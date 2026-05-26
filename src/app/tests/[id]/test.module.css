@@ -1,0 +1,65 @@
+.answerOption {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.answerOption:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.answerOption.selected {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.answerOption.correct {
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.answerOption.incorrect {
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.radioCircle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selected .radioCircle {
+  border-color: var(--accent-primary);
+}
+
+.radioInner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+}
+
+.correct .radioCircle {
+  border-color: var(--success);
+}
+.correct .radioInner {
+  background: var(--success);
+}
+
+.incorrect .radioCircle {
+  border-color: var(--danger);
+}
+.incorrect .radioInner {
+  background: var(--danger);
+}

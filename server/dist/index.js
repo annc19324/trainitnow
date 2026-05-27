@@ -20,7 +20,24 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3001;
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+        // Allow server-to-server or tools with no origin header
+        if (!origin) {
+            callback(null, true);
+            return;
+        }
+        const clientUrl = process.env.CLIENT_URL;
+        const isAllowed = (clientUrl && origin === clientUrl) ||
+            origin.endsWith(".vercel.app") ||
+            origin.startsWith("http://localhost:") ||
+            origin.startsWith("http://127.0.0.1:");
+        if (isAllowed) {
+            callback(null, true);
+        }
+        else {
+            callback(null, false);
+        }
+    },
     credentials: true,
 }));
 app.use(express_1.default.json());

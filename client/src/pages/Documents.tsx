@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FileText, Download } from "lucide-react";
-import styles from "./Topics.module.css";
+import styles from "../styles/Topics.module.css";
 import { useLanguage } from "../components/LanguageContext";
 import { apiRequest } from "../components/AuthContext";
 

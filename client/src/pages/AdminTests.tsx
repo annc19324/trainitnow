@@ -4,7 +4,7 @@ import { CheckCircle, Trash2 } from "lucide-react";
 import { apiRequest } from "../components/AuthContext";
 import { useToast } from "../components/ToastContext";
 import { useLanguage } from "../components/LanguageContext";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 
 export default function AdminTestsPage() {
   const [tests, setTests] = useState<any[]>([]);

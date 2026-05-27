@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
-import styles from "./Topics.module.css";
+import styles from "../styles/Topics.module.css";
 import { useLanguage } from "../components/LanguageContext";
 import { apiRequest, useAuth } from "../components/AuthContext";
 

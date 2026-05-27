@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest } from "../components/AuthContext";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 
 export default function AdminHistoryPage() {
   const [results, setResults] = useState<any[]>([]);

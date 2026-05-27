@@ -20,6 +20,7 @@ import TestDetail from "./pages/TestDetail";
 import CreateTest from "./pages/CreateTest";
 import MyTests from "./pages/MyTests";
 import UserProfile from "./pages/UserProfile";
+import ChangePassword from "./pages/ChangePassword";
 import Documents from "./pages/Documents";
 import MyDocuments from "./pages/MyDocuments";
 import Chat from "./pages/Chat";
@@ -77,6 +78,7 @@ function App() {
 
                 {/* Profile View */}
                 <Route path="/profile/:username" element={<UserProfile />} />
+                <Route path="/change-password" element={<ChangePassword />} />
 
                 {/* Chat & Messages Route */}
                 <Route path="/chat" element={<Chat />} />

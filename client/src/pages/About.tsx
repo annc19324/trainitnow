@@ -1,5 +1,5 @@
 import { BookOpen, Globe, Award } from "lucide-react";
-import styles from "./Home.module.css";
+import styles from "../styles/Home.module.css";
 import { useLanguage } from "../components/LanguageContext";
 
 export default function AboutPage() {

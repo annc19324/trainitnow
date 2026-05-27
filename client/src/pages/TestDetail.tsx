@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Download, CheckCircle, XCircle } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import styles from "./TestDetail.module.css";
+import styles from "../styles/TestDetail.module.css";
 import { useAuth, apiRequest } from "../components/AuthContext";
 import { useLanguage } from "../components/LanguageContext";
 

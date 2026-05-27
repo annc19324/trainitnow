@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 import { Trash2, Edit, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { apiRequest } from "../components/AuthContext";

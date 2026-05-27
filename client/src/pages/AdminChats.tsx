@@ -3,7 +3,7 @@ import { Plus, Edit, Trash2, Users, Loader2, Camera } from "lucide-react";
 import { apiRequest } from "../components/AuthContext";
 import { useToast } from "../components/ToastContext";
 import { useLanguage } from "../components/LanguageContext";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 
 export default function AdminChatsPage() {
   const { showToast } = useToast();

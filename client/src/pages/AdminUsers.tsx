@@ -3,7 +3,7 @@ import { useLanguage } from "../components/LanguageContext";
 import { Trash2, Edit } from "lucide-react";
 import { apiRequest } from "../components/AuthContext";
 import { useToast } from "../components/ToastContext";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 
 export default function AdminUsersPage() {
   const { t, language } = useLanguage();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 import { UploadCloud, Trash2, FileText, Link as LinkIcon } from "lucide-react";
 import { apiRequest } from "../components/AuthContext";
 import { useToast } from "../components/ToastContext";

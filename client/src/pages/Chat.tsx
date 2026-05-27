@@ -3,7 +3,7 @@ import { MessageSquare, Send, ArrowLeft, Search, Loader2, Users } from "lucide-r
 import { useAuth, apiRequest } from "../components/AuthContext";
 import { useLanguage } from "../components/LanguageContext";
 import { useToast } from "../components/ToastContext";
-import styles from "./Chat.module.css";
+import styles from "../styles/Chat.module.css";
 
 interface ChatPartner {
   id: string;

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth, apiRequest } from "./AuthContext";
-import styles from "./Navbar.module.css";
+import styles from "../styles/Navbar.module.css";
 import { User, Settings, LogOut, Menu, X, BookOpen, ClipboardList, FileText, ChevronDown, Globe, Key, MessageSquare } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 
@@ -124,7 +124,7 @@ export default function Navbar() {
                   <Link to={`/profile/${user.username || user.name}`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                     <User size={16} /> {t("nav.profile")}
                   </Link>
-                  <Link to={`/profile/${user.username || user.name}?changePassword=true`} className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                  <Link to="/change-password" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
                     <Key size={16} /> {language === "vi" ? "Đổi mật khẩu" : "Change Password"}
                   </Link>
                   <Link to="/my-tests" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
@@ -202,7 +202,7 @@ export default function Navbar() {
                   </div>
                 </div>
                 <Link to={`/profile/${user.username || user.name}`} className={styles.mobileLink} onClick={closeMobileMenu}><User size={18} /> {t("nav.profile")}</Link>
-                <Link to={`/profile/${user.username || user.name}?changePassword=true`} className={styles.mobileLink} onClick={closeMobileMenu}><Key size={18} /> {language === "vi" ? "Đổi mật khẩu" : "Change Password"}</Link>
+                <Link to="/change-password" className={styles.mobileLink} onClick={closeMobileMenu}><Key size={18} /> {language === "vi" ? "Đổi mật khẩu" : "Change Password"}</Link>
                 <Link to="/my-tests" className={styles.mobileLink} onClick={closeMobileMenu}><ClipboardList size={18} /> {t("nav.myTests")}</Link>
                 {user.role === "ADMIN" && (
                   <Link to="/admin" className={styles.mobileLink} onClick={closeMobileMenu}><Settings size={18} /> {t("nav.admin")}</Link>

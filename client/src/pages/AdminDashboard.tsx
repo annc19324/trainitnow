@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 import { useLanguage } from "../components/LanguageContext";
 import { apiRequest } from "../components/AuthContext";
 

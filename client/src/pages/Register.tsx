@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import styles from "./Auth.module.css";
+import styles from "../styles/Auth.module.css";
 import { useLanguage } from "../components/LanguageContext";
 import { useAuth } from "../components/AuthContext";
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { CheckCircle, FileText } from "lucide-react";
-import styles from "./Topics.module.css";
+import styles from "../styles/Topics.module.css";
 import { apiRequest } from "../components/AuthContext";
 import { useLanguage } from "../components/LanguageContext";
 

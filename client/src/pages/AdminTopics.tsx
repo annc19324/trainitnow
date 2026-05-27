@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 import { Plus, Trash2, Edit, CheckCircle, X } from "lucide-react";
 import { apiRequest } from "../components/AuthContext";
 

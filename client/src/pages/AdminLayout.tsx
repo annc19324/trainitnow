@@ -1,5 +1,5 @@
 import { Navigate, NavLink, Outlet } from "react-router-dom";
-import styles from "./Admin.module.css";
+import styles from "../styles/Admin.module.css";
 import { Settings, FileText, CheckCircle, BookOpen, Users, History, MessageSquare } from "lucide-react";
 import { useAuth } from "../components/AuthContext";
 

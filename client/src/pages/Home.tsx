@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import styles from "./Home.module.css";
+import styles from "../styles/Home.module.css";
 import { ArrowRight, BookOpen, FileText, CheckCircle } from "lucide-react";
 import { useLanguage } from "../components/LanguageContext";
 import { useAuth } from "../components/AuthContext";

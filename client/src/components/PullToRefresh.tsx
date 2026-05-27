@@ -15,18 +15,31 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
   
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const isAtTop = () => {
+    if (window.scrollY > 0) return false;
+    if (document.documentElement.scrollTop > 0) return false;
+    if (document.body.scrollTop > 0) return false;
+
+    let el: HTMLElement | null = containerRef.current;
+    while (el) {
+      if (el.scrollTop > 0) return false;
+      el = el.parentElement;
+    }
+    return true;
+  };
+
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
-      // Only pull to refresh if we are at the top of the page
-      if (window.scrollY === 0 && !isRefreshing) {
+      // Only pull to refresh if we are at the top of the page/container
+      if (isAtTop() && !isRefreshing) {
         setStartY(e.touches[0].pageY);
         setIsPulling(true);
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      // If the page is scrolled down, cancel pulling immediately
-      if (window.scrollY > 0) {
+      // If the page/container is scrolled down, cancel pulling immediately
+      if (!isAtTop()) {
         setIsPulling(false);
         setPullDistance(0);
         return;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../components/LanguageContext";
 import { BookOpen, Plus, Trash2, Edit } from "lucide-react";
 import { useAuth, apiRequest } from "../components/AuthContext";

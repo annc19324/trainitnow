@@ -25,6 +25,13 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      // If the page is scrolled down, cancel pulling immediately
+      if (window.scrollY > 0) {
+        setIsPulling(false);
+        setPullDistance(0);
+        return;
+      }
+
       if (!isPulling || isRefreshing) return;
 
       const currentY = e.touches[0].pageY;
@@ -39,6 +46,8 @@ export default function PullToRefresh({ children }: PullToRefreshProps) {
         const distance = Math.min(diff * 0.4, 80);
         setPullDistance(distance);
       } else {
+        // If user drags up (scrolling down), cancel pull state immediately
+        setIsPulling(false);
         setPullDistance(0);
       }
     };

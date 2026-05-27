@@ -6,7 +6,7 @@ import { useLanguage } from "../components/LanguageContext";
 import { useAuth } from "../components/AuthContext";
 
 export default function Login() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const { login, user } = useAuth();
 
@@ -23,9 +23,29 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail) {
+      setError(language === "vi" ? "Email hoặc tên tài khoản không được để trống" : "Email or username cannot be empty");
+      return;
+    }
+    if (trimmedEmail.length < 3) {
+      setError(language === "vi" ? "Email hoặc tên tài khoản phải có ít nhất 3 ký tự" : "Email or username must be at least 3 characters");
+      return;
+    }
+    if (!trimmedPassword) {
+      setError(language === "vi" ? "Mật khẩu không được để trống" : "Password cannot be empty");
+      return;
+    }
+    if (trimmedPassword.length < 6) {
+      setError(language === "vi" ? "Mật khẩu phải từ 6 ký tự" : "Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
       const res = await fetch(`${apiUrl}/api/auth/login`, {
@@ -33,7 +53,7 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword }),
       });
 
       const data = await res.json();

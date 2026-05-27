@@ -13,16 +13,27 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     setDemoMessage("");
 
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError(language === "vi" ? "Email không được để trống" : "Email cannot be empty");
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError(language === "vi" ? "Định dạng email không hợp lệ" : "Invalid email address format");
+      return;
+    }
+
+    setLoading(true);
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
       const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       const data = await res.json();

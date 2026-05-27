@@ -82,17 +82,59 @@ export default function UserProfile() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !newUsername.trim() || !email.trim()) {
-      setMessage({ text: language === "vi" ? "Vui lòng điền đầy đủ thông tin" : "Please fill out all required fields", type: "error" });
+    setMessage(null);
+
+    const trimmedName = name.trim();
+    const trimmedUsername = newUsername.trim();
+    const trimmedEmail = email.trim();
+
+    // 1. Validate Name
+    if (!trimmedName) {
+      setMessage({ text: language === "vi" ? "Họ và tên không được để trống" : "Full name cannot be empty", type: "error" });
       return;
     }
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
+      setMessage({ text: language === "vi" ? "Họ và tên phải từ 2 đến 50 ký tự" : "Full name must be between 2 and 50 characters", type: "error" });
+      return;
+    }
+
+    // 2. Validate Username
+    if (!trimmedUsername) {
+      setMessage({ text: language === "vi" ? "Tên tài khoản không được để trống" : "Username cannot be empty", type: "error" });
+      return;
+    }
+    if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
+      setMessage({ text: language === "vi" ? "Tên tài khoản phải từ 3 đến 20 ký tự" : "Username must be between 3 and 20 characters", type: "error" });
+      return;
+    }
+    const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+    if (!usernameRegex.test(trimmedUsername)) {
+      setMessage({
+        text: language === "vi" 
+          ? "Tên tài khoản chỉ được chứa chữ cái, chữ số, dấu gạch dưới (_) và dấu chấm (.)" 
+          : "Username can only contain letters, numbers, underscores (_), and dots (.)",
+        type: "error"
+      });
+      return;
+    }
+
+    // 3. Validate Email
+    if (!trimmedEmail) {
+      setMessage({ text: language === "vi" ? "Email không được để trống" : "Email cannot be empty", type: "error" });
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setMessage({ text: language === "vi" ? "Định dạng email không hợp lệ" : "Invalid email address format", type: "error" });
+      return;
+    }
+
     setSaving(true);
-    setMessage(null);
     try {
       const res = await apiRequest("/api/users/profile/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username: newUsername, email }),
+        body: JSON.stringify({ name: trimmedName, username: trimmedUsername, email: trimmedEmail }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
@@ -100,7 +142,7 @@ export default function UserProfile() {
       setProfileUser(data.user);
       setMessage({ text: language === "vi" ? "Cập nhật hồ sơ thành công!" : "Profile updated successfully!", type: "success" });
       setIsEditing(false);
-      if (newUsername !== username) navigate(`/profile/${encodeURIComponent(newUsername)}`);
+      if (trimmedUsername !== username) navigate(`/profile/${encodeURIComponent(trimmedUsername)}`);
     } catch (err: any) {
       setMessage({ text: err.message || (language === "vi" ? "Không thể cập nhật hồ sơ" : "Failed to update profile"), type: "error" });
     } finally {

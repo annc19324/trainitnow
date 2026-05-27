@@ -4,6 +4,15 @@ import { useLanguage } from "../components/LanguageContext";
 import { ArrowLeft, Edit, RotateCcw, Volume2 } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
+const getFontSizeForText = (text: string, isTerm: boolean = true) => {
+  if (!text) return "2rem";
+  const len = text.length;
+  if (len > 120) return "1.1rem";
+  if (len > 70) return "1.35rem";
+  if (len > 35) return "1.65rem";
+  return isTerm ? "2.2rem" : "2rem";
+};
+
 export default function StudyFlashcardsPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -48,9 +57,21 @@ export default function StudyFlashcardsPage() {
   const speakText = (text: string, e: React.MouseEvent) => {
     e.stopPropagation(); // prevent flipping the card
     if ('speechSynthesis' in window) {
+      // Cancel previous speech to avoid queuing / iOS freeze issues
+      window.speechSynthesis.cancel();
+
       const wordToSpeak = text.split('\n')[0].replace(/\(.*\)/, '').trim();
       const utterance = new SpeechSynthesisUtterance(wordToSpeak);
       utterance.lang = 'en-US';
+
+      // Crucial for iOS/iPhone Safari: explicitly bind an English voice
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoice = voices.find(v => v.lang.toLowerCase().startsWith('en-')) || 
+                           voices.find(v => v.lang.toLowerCase().startsWith('en'));
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+
       window.speechSynthesis.speak(utterance);
     } else {
       alert(language === 'vi' ? 'Trình duyệt của bạn không hỗ trợ đọc văn bản.' : 'Your browser does not support text-to-speech.');
@@ -131,7 +152,7 @@ export default function StudyFlashcardsPage() {
           <ArrowLeft size={20} />
         </Link>
         <div style={{ flex: 1 }}>
-          <h1 style={{ margin: 0, fontSize: "1.25rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <h1 style={{ margin: 0, fontSize: "1.25rem", wordBreak: "break-word", whiteSpace: "normal" }}>
             {set.title}
           </h1>
         </div>
@@ -195,33 +216,42 @@ export default function StudyFlashcardsPage() {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "2rem",
+              padding: "1.5rem 2rem",
               border: "1px solid var(--border-color)"
             }}>
-              <h2 style={{ fontSize: "2.2rem", wordBreak: "break-word", whiteSpace: "pre-line", textAlign: "center", margin: 0 }}>
+              <h2 style={{ 
+                fontSize: getFontSizeForText(currentCard.term, true), 
+                wordBreak: "break-word", 
+                whiteSpace: "pre-line", 
+                textAlign: "center", 
+                margin: 0,
+                maxHeight: "150px",
+                overflowY: "auto"
+              }}>
                 {currentCard.term}
               </h2>
               <button 
                 onClick={(e) => speakText(currentCard.term, e)}
                 style={{
-                  marginTop: "1.5rem",
+                  marginTop: "1rem",
                   background: "#2563eb",
                   color: "white",
                   border: "2px solid rgba(255,255,255,0.2)",
                   borderRadius: "50%",
-                  width: "56px",
-                  height: "56px",
+                  width: "50px",
+                  height: "50px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  boxShadow: "0 6px 12px rgba(37, 99, 235, 0.3)"
+                  boxShadow: "0 6px 12px rgba(37, 99, 235, 0.3)",
+                  flexShrink: 0
                 }}
                 title={language === 'vi' ? 'Nghe phát âm' : 'Listen'}
               >
-                <Volume2 size={28} />
+                <Volume2 size={24} />
               </button>
-              <div style={{ position: "absolute", bottom: "1rem", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
                 {language === 'vi' ? 'Nhấn ra ngoài để lật thẻ (Tiếng Việt)' : 'Click outside to flip (Vietnamese)'}
               </div>
             </div>
@@ -240,13 +270,21 @@ export default function StudyFlashcardsPage() {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "2rem",
+              padding: "1.5rem 2rem",
               transform: "rotateX(180deg)"
             }}>
-              <h2 style={{ fontSize: "2rem", wordBreak: "break-word", whiteSpace: "pre-line", textAlign: "center", margin: 0 }}>
+              <h2 style={{ 
+                fontSize: getFontSizeForText(currentCard.definition, false), 
+                wordBreak: "break-word", 
+                whiteSpace: "pre-line", 
+                textAlign: "center", 
+                margin: 0,
+                maxHeight: "200px",
+                overflowY: "auto"
+              }}>
                 {currentCard.definition}
               </h2>
-              <div style={{ position: "absolute", bottom: "1rem", fontSize: "0.8rem", opacity: 0.8 }}>
+              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
                 {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
               </div>
             </div>
@@ -290,30 +328,73 @@ export default function StudyFlashcardsPage() {
       </div>
 
       {!isFinishedRound && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center", 
+          gap: "0.5rem", 
+          width: "100%",
+          maxWidth: "500px",
+          margin: "0 auto",
+          flexWrap: "nowrap"
+        }}>
           <button 
             className="btn btn-secondary" 
             onClick={handleForgot}
-            style={{ padding: "0.75rem 1.5rem", color: "var(--danger)", border: "1px solid var(--danger)", background: "transparent" }}
+            style={{ 
+              flex: 1,
+              padding: "0.75rem 0.5rem", 
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "var(--danger)", 
+              border: "1px solid var(--danger)", 
+              background: "transparent",
+              whiteSpace: "nowrap",
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
           >
-            {language === 'vi' ? 'Chưa nhớ (Bỏ qua)' : 'Forgot (Skip)'}
+            {language === 'vi' ? 'Chưa nhớ' : 'Forgot'}
           </button>
           
           <button 
             className="btn btn-secondary" 
             onClick={handleShuffle}
             title={language === 'vi' ? 'Đảo thẻ' : 'Shuffle'}
-            style={{ width: "50px", height: "50px", borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ 
+              width: "44px", 
+              height: "44px", 
+              borderRadius: "50%", 
+              padding: 0, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              flexShrink: 0
+            }}
           >
-            <RotateCcw size={20} />
+            <RotateCcw size={18} />
           </button>
 
           <button 
             className="btn btn-primary" 
             onClick={handleGotIt}
-            style={{ padding: "0.75rem 1.5rem", background: "var(--success, #10b981)", borderColor: "var(--success, #10b981)" }}
+            style={{ 
+              flex: 1,
+              padding: "0.75rem 0.5rem", 
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              background: "var(--success, #10b981)", 
+              borderColor: "var(--success, #10b981)",
+              whiteSpace: "nowrap",
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
           >
-            {language === 'vi' ? 'Đã nhớ (Tiếp)' : 'Got it (Next)'}
+            {language === 'vi' ? 'Đã nhớ' : 'Got it'}
           </button>
         </div>
       )}

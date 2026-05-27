@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum DocumentType {
+  THEORY
+  EXERCISE
+}
+
+enum TestType {
+  MULTIPLE_CHOICE
+  ESSAY
+  MIXED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  ESSAY
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String?  @unique
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documents    Document[]
+  tests        Test[]
+  topics       Topic[]
+  comments     Comment[]
+  flashcardSets FlashcardSet[]
+  testResults  TestResult[]
+  sentMessages     ChatMessage[] @relation("SentMessages")
+  receivedMessages ChatMessage[] @relation("ReceivedMessages")
+}
+
+model Topic {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  documents Document[]
+  tests     Test[]
+  flashcardSets FlashcardSet[]
+}
+
+model Document {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String
+  type        DocumentType
+  topicId     String?
+  topic       Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Test {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  type        TestType
+  topicId     String?
+  topic       Topic?     @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  questions   Question[]
+  testResults TestResult[]
+}
+
+model Question {
+  id       String       @id @default(uuid())
+  content  String
+  imageUrl String?
+  type     QuestionType
+  order    Int          @default(0)
+  testId   String
+  test     Test         @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  answers Answer[]
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  content    String
+  isCorrect  Boolean  @default(false)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TestResult {
+  id          String   @id @default(uuid())
+  score       Int
+  totalQ      Int
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  testId      String
+  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model FlashcardSet {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  topicId     String?
+  topic       Topic?      @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  flashcards  Flashcard[]
+}
+
+model Flashcard {
+  id             String       @id @default(uuid())
+  term           String
+  definition     String
+  flashcardSetId String
+  flashcardSet   FlashcardSet @relation(fields: [flashcardSetId], references: [id], onDelete: Cascade)
+}
+
+model ChatGroup {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  avatarUrl   String?
+  isCommunity Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  messages    ChatMessage[]
+}
+
+model ChatMessage {
+  id          String     @id @default(uuid())
+  content     String
+  senderId    String
+  sender      User       @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String?
+  receiver    User?      @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  groupId     String?
+  group       ChatGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  isRead      Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+}

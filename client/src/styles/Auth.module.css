@@ -76,3 +76,28 @@
     padding: 2rem 1.5rem;
   }
 }
+
+.fieldError {
+  color: var(--danger);
+  font-size: 0.775rem;
+  margin-top: 0.15rem;
+  display: block;
+  font-weight: 500;
+  animation: slideInDown 0.2s ease-out;
+}
+
+.inputError {
+  border-color: rgba(239, 68, 68, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

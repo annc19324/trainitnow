@@ -5,6 +5,27 @@ import styles from "../styles/Navbar.module.css";
 import { User, Settings, LogOut, Menu, X, BookOpen, ClipboardList, FileText, ChevronDown, Globe, Key, MessageSquare } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 
+const formatDisplayName = (fullName: string, maxLength: number = 12) => {
+  if (!fullName) return "";
+  if (fullName.length <= maxLength) return fullName;
+
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) return fullName.slice(0, maxLength) + "...";
+
+  let result = "";
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const candidate = result ? `${parts[i]} ${result}` : parts[i];
+    if (candidate.length + 3 > maxLength) {
+      if (!result) {
+        return "..." + parts[parts.length - 1];
+      }
+      break;
+    }
+    result = candidate;
+  }
+  return "..." + result;
+};
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -110,7 +131,7 @@ export default function Navbar() {
                     user.name?.charAt(0).toUpperCase() || 'U'
                   )}
                 </div>
-                <span className={styles.userName}>{user.name}</span>
+                <span className={styles.userName}>{formatDisplayName(user.name)}</span>
                 <ChevronDown size={16} className={dropdownOpen ? styles.iconRotated : ''} />
               </button>
 

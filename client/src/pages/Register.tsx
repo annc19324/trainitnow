@@ -20,69 +20,68 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    username?: string;
+    email?: string;
+    password?: string;
+    general?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setFieldErrors({});
 
     const trimmedName = name.trim();
     const trimmedUsername = username.trim();
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
+    const errors: typeof fieldErrors = {};
+
     // 1. Validate Name
     if (!trimmedName) {
-      setError(language === "vi" ? "Họ và tên không được để trống" : "Full name cannot be empty");
-      return;
-    }
-    if (trimmedName.length < 2 || trimmedName.length > 50) {
-      setError(language === "vi" ? "Họ và tên phải từ 2 đến 50 ký tự" : "Full name must be between 2 and 50 characters");
-      return;
+      errors.name = language === "vi" ? "Họ và tên không được để trống" : "Full name cannot be empty";
+    } else if (trimmedName.length < 2 || trimmedName.length > 50) {
+      errors.name = language === "vi" ? "Họ và tên phải từ 2 đến 50 ký tự" : "Full name must be between 2 and 50 characters";
     }
 
     // 2. Validate Username
     if (!trimmedUsername) {
-      setError(language === "vi" ? "Tên tài khoản không được để trống" : "Username cannot be empty");
-      return;
-    }
-    if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
-      setError(language === "vi" ? "Tên tài khoản phải từ 3 đến 20 ký tự" : "Username must be between 3 and 20 characters");
-      return;
-    }
-    const usernameRegex = /^[a-zA-Z0-9_.]+$/;
-    if (!usernameRegex.test(trimmedUsername)) {
-      setError(
-        language === "vi" 
-          ? "Tên tài khoản chỉ được chứa chữ cái, chữ số, dấu gạch dưới (_) và dấu chấm (.)" 
-          : "Username can only contain letters, numbers, underscores (_), and dots (.)"
-      );
-      return;
+      errors.username = language === "vi" ? "Tên tài khoản không được để trống" : "Username cannot be empty";
+    } else if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
+      errors.username = language === "vi" ? "Tên tài khoản phải từ 3 đến 20 ký tự" : "Username must be between 3 and 20 characters";
+    } else {
+      const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+      if (!usernameRegex.test(trimmedUsername)) {
+        errors.username = language === "vi" 
+          ? "Chỉ được chứa chữ cái, số, gạch dưới (_) và dấu chấm (.)" 
+          : "Can only contain letters, numbers, underscores (_), and dots (.)";
+      }
     }
 
     // 3. Validate Email
     if (!trimmedEmail) {
-      setError(language === "vi" ? "Email không được để trống" : "Email cannot be empty");
-      return;
-    }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      setError(language === "vi" ? "Định dạng email không hợp lệ" : "Invalid email address format");
-      return;
+      errors.email = language === "vi" ? "Email không được để trống" : "Email cannot be empty";
+    } else {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        errors.email = language === "vi" ? "Định dạng email không hợp lệ" : "Invalid email address format";
+      }
     }
 
     // 4. Validate Password
     if (!trimmedPassword) {
-      setError(language === "vi" ? "Mật khẩu không được để trống" : "Password cannot be empty");
-      return;
+      errors.password = language === "vi" ? "Mật khẩu không được để trống" : "Password cannot be empty";
+    } else if (trimmedPassword.length < 6) {
+      errors.password = language === "vi" ? "Mật khẩu phải có ít nhất 6 ký tự" : "Password must be at least 6 characters";
+    } else if (/\s/.test(trimmedPassword)) {
+      errors.password = language === "vi" ? "Mật khẩu không được chứa khoảng trắng" : "Password cannot contain spaces";
     }
-    if (trimmedPassword.length < 6) {
-      setError(language === "vi" ? "Mật khẩu phải có ít nhất 6 ký tự" : "Password must be at least 6 characters");
-      return;
-    }
-    if (/\s/.test(trimmedPassword)) {
-      setError(language === "vi" ? "Mật khẩu không được chứa khoảng trắng" : "Password cannot contain spaces");
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -111,7 +110,15 @@ export default function Register() {
       login(data.token, data.user);
       navigate("/");
     } catch (err: any) {
-      setError(err.message);
+      const msg = err.message || "";
+      const lower = msg.toLowerCase();
+      if (lower.includes("email")) {
+        setFieldErrors({ email: language === "vi" ? "Địa chỉ email này đã được sử dụng bởi tài khoản khác" : "This email address is already taken" });
+      } else if (lower.includes("username") || lower.includes("tên tài khoản") || lower.includes("tên đăng nhập")) {
+        setFieldErrors({ username: language === "vi" ? "Tên đăng nhập này đã được sử dụng" : "This username is already taken" });
+      } else {
+        setFieldErrors({ general: msg });
+      }
     } finally {
       setLoading(false);
     }
@@ -123,44 +130,52 @@ export default function Register() {
         <h2 className="gradient-text" style={{ textAlign: "center", marginBottom: "1.5rem", fontSize: "1.75rem" }}>
           {t("auth.register.title")}
         </h2>
-        {error && <div className={styles.errorAlert}>{error}</div>}
+        
+        {fieldErrors.general && <div className={styles.errorAlert}>{fieldErrors.general}</div>}
+        
         <form onSubmit={handleSubmit} className={styles.authForm}>
           <div className={styles.inputGroup}>
             <label>{t("auth.label.name")}</label>
             <input 
               type="text" 
-              className="input-field" 
+              className={`input-field ${fieldErrors.name ? styles.inputError : ""}`} 
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               required 
             />
+            {fieldErrors.name && <span className={styles.fieldError}>{fieldErrors.name}</span>}
           </div>
+          
           <div className={styles.inputGroup}>
             <label>{t("auth.label.username")}</label>
             <input 
               type="text" 
-              className="input-field" 
+              className={`input-field ${fieldErrors.username ? styles.inputError : ""}`} 
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               required 
             />
+            {fieldErrors.username && <span className={styles.fieldError}>{fieldErrors.username}</span>}
           </div>
+          
           <div className={styles.inputGroup}>
             <label>{t("auth.label.email")}</label>
             <input 
               type="email" 
-              className="input-field" 
+              className={`input-field ${fieldErrors.email ? styles.inputError : ""}`} 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
             />
+            {fieldErrors.email && <span className={styles.fieldError}>{fieldErrors.email}</span>}
           </div>
+          
           <div className={styles.inputGroup}>
             <label>{t("auth.label.password")}</label>
             <div className={styles.passwordWrapper}>
               <input 
                 type={showPassword ? "text" : "password"} 
-                className="input-field" 
+                className={`input-field ${fieldErrors.password ? styles.inputError : ""}`} 
                 style={{ paddingRight: "2.5rem" }}
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
@@ -175,7 +190,9 @@ export default function Register() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {fieldErrors.password && <span className={styles.fieldError}>{fieldErrors.password}</span>}
           </div>
+          
           <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "0.5rem" }} disabled={loading}>
             {loading ? t("auth.register.registering") : t("auth.register.btn")}
           </button>

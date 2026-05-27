@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import styles from "../styles/Admin.module.css";
+import styles from "../../styles/Admin.module.css";
 import { Trash2, Edit, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
-import { apiRequest } from "../components/AuthContext";
-import { useToast } from "../components/ToastContext";
-import { useLanguage } from "../components/LanguageContext";
+import { apiRequest } from "../../components/AuthContext";
+import { useToast } from "../../components/ToastContext";
+import { useLanguage } from "../../components/LanguageContext";
 
 export default function AdminFlashcardsPage() {
   const [sets, setSets] = useState<any[]>([]);
@@ -48,7 +48,6 @@ export default function AdminFlashcardsPage() {
     <div className="animate-fade-in">
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">Quản lý thẻ ghi nhớ</h1>
-        <p>Quản lý toàn bộ bộ thẻ ghi nhớ của người dùng trên hệ thống.</p>
       </div>
       
       {loading ? (

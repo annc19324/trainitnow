@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import styles from "../styles/Admin.module.css";
+import styles from "../../styles/Admin.module.css";
 import { Plus, Trash2, Edit, CheckCircle, X } from "lucide-react";
-import { apiRequest } from "../components/AuthContext";
+import { apiRequest } from "../../components/AuthContext";
 
 function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
   useEffect(() => {
@@ -118,7 +118,6 @@ export default function AdminTopicsPage() {
 
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">Quản lý chủ đề</h1>
-        <p>Thêm, sửa và xóa các chủ đề học trên hệ thống.</p>
       </div>
 
       <div className={`glass-panel`} style={{ padding: "2rem", marginBottom: "2rem" }}>

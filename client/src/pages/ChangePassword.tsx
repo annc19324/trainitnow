@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Key, Eye, EyeOff, Check, X, Save } from "lucide-react";
+import { Eye, EyeOff, Check, X, Save } from "lucide-react";
 import { useAuth, apiRequest } from "../components/AuthContext";
 import { useLanguage } from "../components/LanguageContext";
 
@@ -86,29 +86,15 @@ export default function ChangePassword() {
   };
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: "500px", margin: "2rem auto", paddingBottom: "4rem" }}>
-      <div className="glass-panel" style={{ padding: "2.5rem" }}>
+    <div className="animate-fade-in" style={{ maxWidth: "420px", margin: "0 auto", paddingBottom: "2rem" }}>
+      <div className="glass-panel" style={{ padding: "1.5rem" }}>
         
         {/* Header */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "2rem", textAlign: "center" }}>
-          <div style={{ 
-            width: "60px", 
-            height: "60px", 
-            borderRadius: "50%", 
-            background: "rgba(30, 58, 138, 0.1)", 
-            border: "2px solid var(--accent-primary)", 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
-            marginBottom: "1rem",
-            color: "var(--accent-primary)"
-          }}>
-            <Key size={30} />
-          </div>
-          <h2 className="gradient-text" style={{ fontSize: "1.8rem", fontWeight: 700 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "1.25rem", textAlign: "center" }}>
+          <h2 className="gradient-text" style={{ fontSize: "1.4rem", fontWeight: 700 }}>
             {language === "vi" ? "Đổi Mật Khẩu" : "Change Password"}
           </h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", marginTop: "0.25rem" }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginTop: "0.15rem" }}>
             {language === "vi" ? "Cập nhật mật khẩu bảo vệ tài khoản của bạn" : "Update your password to keep your account secure"}
           </p>
         </div>
@@ -116,18 +102,18 @@ export default function ChangePassword() {
         {/* Message Banner */}
         {message && (
           <div style={{
-            padding: "1rem", 
+            padding: "0.75rem 1rem", 
             borderRadius: "var(--radius-md)", 
-            marginBottom: "1.5rem",
+            marginBottom: "1rem",
             background: message.type === "success" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
             border: `1px solid ${message.type === "success" ? "var(--success, #10b981)" : "var(--danger)"}`,
             color: message.type === "success" ? "var(--success, #10b981)" : "var(--danger)",
             display: "flex", 
             alignItems: "center", 
             gap: "0.5rem",
-            fontSize: "0.9rem"
+            fontSize: "0.85rem"
           }}>
-            {message.type === "success" ? <Check size={18} /> : <X size={18} />}
+            {message.type === "success" ? <Check size={16} /> : <X size={16} />}
             <span>{message.text}</span>
           </div>
         )}

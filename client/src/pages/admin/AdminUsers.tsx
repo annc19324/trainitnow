@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useLanguage } from "../components/LanguageContext";
+import { useLanguage } from "../../components/LanguageContext";
 import { Trash2, Edit } from "lucide-react";
-import { apiRequest } from "../components/AuthContext";
-import { useToast } from "../components/ToastContext";
-import styles from "../styles/Admin.module.css";
+import { apiRequest } from "../../components/AuthContext";
+import { useToast } from "../../components/ToastContext";
+import styles from "../../styles/Admin.module.css";
 
 export default function AdminUsersPage() {
   const { t, language } = useLanguage();
@@ -69,7 +69,6 @@ export default function AdminUsersPage() {
     <div className="animate-fade-in">
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">{t("admin.users")}</h1>
-        <p>{language === "vi" ? "Quản lý toàn bộ tài khoản người dùng trên hệ thống." : "Manage all registered users on the platform."}</p>
       </div>
 
       <div className="glass-panel" style={{ overflowX: "auto" }}>

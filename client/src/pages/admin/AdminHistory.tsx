@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { apiRequest } from "../components/AuthContext";
-import styles from "../styles/Admin.module.css";
+import { apiRequest } from "../../components/AuthContext";
+import styles from "../../styles/Admin.module.css";
 
 export default function AdminHistoryPage() {
   const [results, setResults] = useState<any[]>([]);
@@ -48,7 +48,6 @@ export default function AdminHistoryPage() {
     <div className="animate-fade-in">
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">Lịch sử làm bài</h1>
-        <p>Tổng hợp toàn bộ lượt làm bài kiểm tra của người dùng — {results.length} kết quả.</p>
       </div>
 
       {/* Stats row */}

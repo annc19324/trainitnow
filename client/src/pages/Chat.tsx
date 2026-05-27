@@ -18,6 +18,7 @@ interface ChatGroup {
   name: string;
   description: string | null;
   isCommunity: boolean;
+  avatarUrl: string | null;
 }
 
 interface Message {
@@ -252,8 +253,14 @@ export default function Chat() {
               className={`${styles.chatItem} ${activeGroup?.id === g.id ? styles.chatItemActive : ""}`}
               onClick={() => selectGroup(g)}
             >
-              <div className={styles.avatar} style={{ background: "var(--accent-gradient)" }}>
-                <Users size={18} />
+              <div className={styles.avatar}>
+                {g.avatarUrl ? (
+                  <img src={g.avatarUrl} alt={g.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ background: "var(--accent-gradient)", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+                    <Users size={18} style={{ color: "white" }} />
+                  </div>
+                )}
               </div>
               <div className={styles.chatInfo}>
                 <div className={styles.chatName}>{g.name}</div>
@@ -314,7 +321,13 @@ export default function Chat() {
                 </button>
                 <div className={styles.avatar}>
                   {activeGroup ? (
-                    <Users size={18} />
+                    activeGroup.avatarUrl ? (
+                      <img src={activeGroup.avatarUrl} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <div style={{ background: "var(--accent-gradient)", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+                        <Users size={18} style={{ color: "white" }} />
+                      </div>
+                    )
                   ) : activePartner?.avatarUrl ? (
                     <img src={activePartner.avatarUrl} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (

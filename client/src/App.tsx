@@ -31,15 +31,15 @@ import FlashcardsStudy from "./pages/FlashcardsStudy";
 import FlashcardsEdit from "./pages/FlashcardsEdit";
 
 // Admin Dashboard & Management Pages
-import AdminLayout from "./pages/AdminLayout";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminUsers from "./pages/AdminUsers";
-import AdminTopics from "./pages/AdminTopics";
-import AdminTests from "./pages/AdminTests";
-import AdminDocuments from "./pages/AdminDocuments";
-import AdminFlashcards from "./pages/AdminFlashcards";
-import AdminHistory from "./pages/AdminHistory";
-import AdminChats from "./pages/AdminChats";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminTopics from "./pages/admin/AdminTopics";
+import AdminTests from "./pages/admin/AdminTests";
+import AdminDocuments from "./pages/admin/AdminDocuments";
+import AdminFlashcards from "./pages/admin/AdminFlashcards";
+import AdminHistory from "./pages/admin/AdminHistory";
+import AdminChats from "./pages/admin/AdminChats";
 
 function App() {
   return (

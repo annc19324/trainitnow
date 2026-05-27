@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import styles from "../styles/Admin.module.css";
-import { useLanguage } from "../components/LanguageContext";
-import { apiRequest } from "../components/AuthContext";
+import styles from "../../styles/Admin.module.css";
+import { useLanguage } from "../../components/LanguageContext";
+import { apiRequest } from "../../components/AuthContext";
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
@@ -53,7 +53,6 @@ export default function AdminDashboard() {
     <div className="animate-fade-in">
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">{t("admin.title")}</h1>
-        <p>Tổng quan thống kê nền tảng.</p>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem" }}>
         {cards.map(card => (

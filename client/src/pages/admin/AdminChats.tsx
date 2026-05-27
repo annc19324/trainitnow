@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Users, Loader2, Camera } from "lucide-react";
-import { apiRequest } from "../components/AuthContext";
-import { useToast } from "../components/ToastContext";
-import { useLanguage } from "../components/LanguageContext";
-import styles from "../styles/Admin.module.css";
+import { apiRequest } from "../../components/AuthContext";
+import { useToast } from "../../components/ToastContext";
+import { useLanguage } from "../../components/LanguageContext";
+import styles from "../../styles/Admin.module.css";
 
 export default function AdminChatsPage() {
   const { showToast } = useToast();
@@ -124,9 +124,6 @@ export default function AdminChatsPage() {
         <h1 className="gradient-text">
           {language === "vi" ? "Quản lý Nhóm Chat" : "Manage Chat Groups"}
         </h1>
-        <p>
-          {language === "vi" ? "Thêm, sửa và xóa các nhóm chat cộng đồng trên hệ thống." : "Add, edit and delete community chat channels."}
-        </p>
       </div>
 
       {/* Form */}

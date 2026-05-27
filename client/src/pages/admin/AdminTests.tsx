@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle, Trash2 } from "lucide-react";
-import { apiRequest } from "../components/AuthContext";
-import { useToast } from "../components/ToastContext";
-import { useLanguage } from "../components/LanguageContext";
-import styles from "../styles/Admin.module.css";
+import { apiRequest } from "../../components/AuthContext";
+import { useToast } from "../../components/ToastContext";
+import { useLanguage } from "../../components/LanguageContext";
+import styles from "../../styles/Admin.module.css";
 
 export default function AdminTestsPage() {
   const [tests, setTests] = useState<any[]>([]);
@@ -57,7 +57,6 @@ export default function AdminTestsPage() {
     <div className="animate-fade-in">
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">Quản lý bài kiểm tra</h1>
-        <p>Quản lý toàn bộ bài kiểm tra được đăng trên hệ thống.</p>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1.5rem" }}>
         <Link to="/tests/create" className="btn btn-primary">Tạo bài mới</Link>

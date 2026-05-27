@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import styles from "../styles/Admin.module.css";
+import styles from "../../styles/Admin.module.css";
 import { UploadCloud, Trash2, FileText, Link as LinkIcon } from "lucide-react";
-import { apiRequest } from "../components/AuthContext";
-import { useToast } from "../components/ToastContext";
-import { useLanguage } from "../components/LanguageContext";
+import { apiRequest } from "../../components/AuthContext";
+import { useToast } from "../../components/ToastContext";
+import { useLanguage } from "../../components/LanguageContext";
 
 export default function AdminDocumentsPage() {
   const [documents, setDocuments] = useState<any[]>([]);
@@ -101,7 +101,6 @@ export default function AdminDocumentsPage() {
     <div className="animate-fade-in">
       <div className={styles.pageHeader}>
         <h1 className="gradient-text">Quản lý tài liệu</h1>
-        <p>Tải lên và quản lý toàn bộ tài liệu học tập trên hệ thống.</p>
       </div>
       
       <div className="glass-panel" style={{ padding: "2rem", marginBottom: "2rem" }}>

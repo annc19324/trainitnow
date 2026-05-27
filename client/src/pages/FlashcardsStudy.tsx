@@ -7,9 +7,10 @@ import { apiRequest, useAuth } from "../components/AuthContext";
 const getFontSizeForText = (text: string, isTerm: boolean = true) => {
   if (!text) return "2rem";
   const len = text.length;
-  if (len > 120) return "1.1rem";
-  if (len > 70) return "1.35rem";
-  if (len > 35) return "1.65rem";
+  if (len > 180) return "0.7rem";
+  if (len > 120) return "0.85rem";
+  if (len > 70) return "1.1rem";
+  if (len > 35) return "1.45rem";
   return isTerm ? "2.2rem" : "2rem";
 };
 
@@ -224,9 +225,7 @@ export default function StudyFlashcardsPage() {
                 wordBreak: "break-word", 
                 whiteSpace: "pre-line", 
                 textAlign: "center", 
-                margin: 0,
-                maxHeight: "150px",
-                overflowY: "auto"
+                margin: 0
               }}>
                 {currentCard.term}
               </h2>
@@ -278,9 +277,7 @@ export default function StudyFlashcardsPage() {
                 wordBreak: "break-word", 
                 whiteSpace: "pre-line", 
                 textAlign: "center", 
-                margin: 0,
-                maxHeight: "200px",
-                overflowY: "auto"
+                margin: 0
               }}>
                 {currentCard.definition}
               </h2>

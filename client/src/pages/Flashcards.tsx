@@ -16,6 +16,7 @@ export default function FlashcardsPage() {
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<"latest" | "alphabetical">("latest");
 
   const fetchSets = async () => {
     try {
@@ -96,9 +97,17 @@ export default function FlashcardsPage() {
     return <div className="container" style={{ padding: "4rem 1rem", textAlign: "center" }}>Loading...</div>;
   }
 
+  const sortedSets = [...sets].sort((a, b) => {
+    if (sortBy === "alphabetical") {
+      return a.title.localeCompare(b.title, language === "vi" ? "vi" : "en", { sensitivity: "base" });
+    }
+    // "latest"
+    return new Date(b.createdAt || b.id).getTime() - new Date(a.createdAt || a.id).getTime();
+  });
+
   return (
     <div className="container" style={{ padding: "4rem 1rem", minHeight: "80vh" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h1 className="gradient-text" style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>
             {t("nav.flashcards")}
@@ -107,15 +116,37 @@ export default function FlashcardsPage() {
             {language === 'vi' ? 'Tạo và học từ vựng với thẻ ghi nhớ' : 'Create and learn vocabulary with flashcards'}
           </p>
         </div>
-        {user ? (
-          <button className="btn btn-primary" onClick={() => setShowCreateForm(!showCreateForm)}>
-            <Plus size={18} /> {language === 'vi' ? 'Tạo bộ thẻ' : 'Create Set'}
-          </button>
-        ) : (
-          <button className="btn btn-primary" onClick={() => navigate("/login")}>
-            {language === 'vi' ? 'Đăng nhập để tạo bộ thẻ' : 'Log in to create set'}
-          </button>
-        )}
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value as "latest" | "alphabetical")}
+            className="input-field" 
+            style={{ 
+              padding: "0.5rem 1.5rem", 
+              fontSize: "0.9rem", 
+              width: "auto", 
+              margin: 0, 
+              background: "var(--bg-secondary)", 
+              border: "1px solid var(--border-color)", 
+              borderRadius: "var(--radius-md)",
+              cursor: "pointer",
+              height: "42px"
+            }}
+          >
+            <option value="latest">{language === "vi" ? "Mới nhất" : "Latest"}</option>
+            <option value="alphabetical">{language === "vi" ? "Sắp xếp A-Z" : "Alphabetical A-Z"}</option>
+          </select>
+
+          {user ? (
+            <button className="btn btn-primary" style={{ height: "42px" }} onClick={() => setShowCreateForm(!showCreateForm)}>
+              <Plus size={18} /> {language === 'vi' ? 'Tạo bộ thẻ' : 'Create Set'}
+            </button>
+          ) : (
+            <button className="btn btn-primary" style={{ height: "42px" }} onClick={() => navigate("/login")}>
+              {language === 'vi' ? 'Đăng nhập để tạo bộ thẻ' : 'Log in to create set'}
+            </button>
+          )}
+        </div>
       </div>
 
       {showCreateForm && user && (
@@ -162,7 +193,7 @@ export default function FlashcardsPage() {
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
-          {sets.map(set => (
+          {sortedSets.map(set => (
             <div key={set.id} style={{ 
               background: "var(--bg-secondary)", 
               borderRadius: "var(--radius-lg)", 

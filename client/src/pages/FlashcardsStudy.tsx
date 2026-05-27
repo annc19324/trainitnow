@@ -4,13 +4,22 @@ import { useLanguage } from "../components/LanguageContext";
 import { ArrowLeft, Edit, RotateCcw, Volume2 } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
-const getFontSizeForText = (text: string, isTerm: boolean = true) => {
+const getFontSizeForLines = (text: string, isTerm: boolean = true) => {
   if (!text) return "2rem";
-  const len = text.length;
-  if (len > 180) return "0.7rem";
-  if (len > 120) return "0.85rem";
-  if (len > 70) return "1.1rem";
-  if (len > 35) return "1.45rem";
+  const lines = text.split("\n");
+  let maxLength = 0;
+  for (const line of lines) {
+    if (line.trim().length > maxLength) {
+      maxLength = line.trim().length;
+    }
+  }
+
+  // Highly optimized thresholds for single-line no-wrap layout on mobile
+  if (maxLength > 45) return "0.75rem";
+  if (maxLength > 35) return "0.85rem";
+  if (maxLength > 25) return "1.05rem";
+  if (maxLength > 18) return "1.3rem";
+  if (maxLength > 12) return "1.65rem";
   return isTerm ? "2.2rem" : "2rem";
 };
 
@@ -220,15 +229,23 @@ export default function StudyFlashcardsPage() {
               padding: "1.5rem 2rem",
               border: "1px solid var(--border-color)"
             }}>
-              <h2 style={{ 
-                fontSize: getFontSizeForText(currentCard.term, true), 
-                wordBreak: "break-word", 
-                whiteSpace: "pre-line", 
+              <div style={{ 
+                fontSize: getFontSizeForLines(currentCard.term, true),
                 textAlign: "center", 
-                margin: 0
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.4rem",
+                justifyContent: "center",
+                alignItems: "center",
+                fontWeight: "bold"
               }}>
-                {currentCard.term}
-              </h2>
+                {currentCard.term.split("\n").map((line: string, idx: number) => (
+                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {line}
+                  </div>
+                ))}
+              </div>
               <button 
                 onClick={(e) => speakText(currentCard.term, e)}
                 style={{
@@ -272,15 +289,23 @@ export default function StudyFlashcardsPage() {
               padding: "1.5rem 2rem",
               transform: "rotateX(180deg)"
             }}>
-              <h2 style={{ 
-                fontSize: getFontSizeForText(currentCard.definition, false), 
-                wordBreak: "break-word", 
-                whiteSpace: "pre-line", 
+              <div style={{ 
+                fontSize: getFontSizeForLines(currentCard.definition, false),
                 textAlign: "center", 
-                margin: 0
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.4rem",
+                justifyContent: "center",
+                alignItems: "center",
+                fontWeight: "bold"
               }}>
-                {currentCard.definition}
-              </h2>
+                {currentCard.definition.split("\n").map((line: string, idx: number) => (
+                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {line}
+                  </div>
+                ))}
+              </div>
               <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
                 {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
               </div>

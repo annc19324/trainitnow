@@ -14,12 +14,14 @@ const getFontSizeForLines = (text: string, isTerm: boolean = true) => {
     }
   }
 
-  // Highly optimized thresholds for single-line no-wrap layout on mobile
-  if (maxLength > 45) return "0.75rem";
-  if (maxLength > 35) return "0.85rem";
-  if (maxLength > 25) return "1.05rem";
-  if (maxLength > 18) return "1.3rem";
-  if (maxLength > 12) return "1.65rem";
+  // Highly optimized scaling steps to keep very long translations fully visible on mobile screens
+  if (maxLength > 80) return "0.45rem";
+  if (maxLength > 65) return "0.55rem";
+  if (maxLength > 52) return "0.65rem";
+  if (maxLength > 42) return "0.75rem";
+  if (maxLength > 32) return "0.9rem";
+  if (maxLength > 22) return "1.1rem";
+  if (maxLength > 14) return "1.45rem";
   return isTerm ? "2.2rem" : "2rem";
 };
 
@@ -250,7 +252,7 @@ export default function StudyFlashcardsPage() {
                 fontWeight: "bold"
               }}>
                 {currentCard.term.split("\n").map((line: string, idx: number) => (
-                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
                     {line}
                   </div>
                 ))}
@@ -310,7 +312,7 @@ export default function StudyFlashcardsPage() {
                 fontWeight: "bold"
               }}>
                 {currentCard.definition.split("\n").map((line: string, idx: number) => (
-                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
                     {line}
                   </div>
                 ))}

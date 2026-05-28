@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FileText, Download } from "lucide-react";
 import styles from "../styles/Topics.module.css";
 import { useLanguage } from "../components/LanguageContext";
@@ -6,6 +7,7 @@ import { apiRequest } from "../components/AuthContext";
 
 export default function DocumentsPage() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,21 +48,52 @@ export default function DocumentsPage() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {documents.map((doc) => (
-            <div key={doc.id} className={`glass-panel ${styles.card}`}>
-              <div className={styles.cardHeader}>
-                <h3>{doc.title}</h3>
-                <span className={styles.badge}>{doc.type}</span>
+          {documents.map((doc) => {
+            const cleanDescription = doc.description 
+              ? doc.description.replace(/<\/?[^>]+(>|$)/g, "") 
+              : "";
+            
+            return (
+              <div 
+                key={doc.id} 
+                className={`glass-panel ${styles.card}`}
+                onClick={() => navigate(`/documents/${doc.id}`)}
+                style={{ 
+                  cursor: "pointer", 
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = "translateY(-4px)"}
+                onMouseOut={(e) => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                <div className={styles.cardHeader}>
+                  <h3>{doc.title}</h3>
+                  <span className={styles.badge}>{doc.type}</span>
+                </div>
+                <p className={styles.description} style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }}>
+                  {cleanDescription || t("topics.noDesc")}
+                </p>
+                <div className={styles.stats} style={{ justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
+                  <span>{t("tests.topic")} {doc.topic?.title || t("tests.general")}</span>
+                  <a 
+                    href={doc.fileUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn btn-primary" 
+                    style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Download size={14} style={{ marginRight: "0.25rem" }} /> {t("docs.download")}
+                  </a>
+                </div>
               </div>
-              <p className={styles.description}>{doc.description || t("topics.noDesc")}</p>
-              <div className={styles.stats} style={{ justifyContent: "space-between", alignItems: "center" }}>
-                <span>{t("tests.topic")} {doc.topic?.title || t("tests.general")}</span>
-                <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
-                  <Download size={14} style={{ marginRight: "0.25rem" }} /> {t("docs.download")}
-                </a>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

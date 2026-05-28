@@ -22,6 +22,7 @@ import MyTests from "./pages/MyTests";
 import UserProfile from "./pages/UserProfile";
 import ChangePassword from "./pages/ChangePassword";
 import Documents from "./pages/Documents";
+import DocumentDetail from "./pages/DocumentDetail";
 import MyDocuments from "./pages/MyDocuments";
 import Chat from "./pages/Chat";
 
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/topics" element={<Topics />} />
                 <Route path="/topics/:id" element={<TopicDetail />} />
                 <Route path="/documents" element={<Documents />} />
+                <Route path="/documents/:id" element={<DocumentDetail />} />
                 <Route path="/my-documents" element={<MyDocuments />} />
 
                 {/* Interactive Practice Tests */}

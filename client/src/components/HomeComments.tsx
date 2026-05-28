@@ -72,8 +72,8 @@ export default function HomeComments() {
   const { t } = useLanguage();
   return (
     <div className="glass-panel" style={{ padding: "2rem", marginTop: "4rem" }}>
-      <h2 className="gradient-text" style={{ fontSize: "1.75rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <MessageSquare size={24} /> {t("home.comments.title") || "Community Reviews & Comments"}
+      <h2 className="gradient-text" style={{ fontSize: "1.35rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <MessageSquare size={20} /> {t("home.comments.title") || "Community Reviews & Comments"}
       </h2>
       
       <form onSubmit={handleSubmit} style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>

@@ -20,10 +20,10 @@ export default function Home() {
             {t("home.desc")}
           </p>
           <div className={styles.ctaGroup}>
-            <Link to={user ? "/topics" : "/register"} className="btn btn-primary">
-              {t("home.start")} <ArrowRight size={18} style={{ marginLeft: "8px" }} />
+            <Link to={user ? "/topics" : "/register"} className="btn btn-primary" style={{ whiteSpace: "nowrap" }}>
+              {t("home.start")} <ArrowRight size={18} style={{ marginLeft: "8px", flexShrink: 0 }} />
             </Link>
-            <Link to="/topics" className="btn btn-secondary">
+            <Link to="/topics" className="btn btn-secondary" style={{ whiteSpace: "nowrap" }}>
               {t("home.browse")}
             </Link>
           </div>

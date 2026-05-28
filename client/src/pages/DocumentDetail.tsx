@@ -61,10 +61,12 @@ export default function DocumentDetailPage() {
       <div className="glass-panel" style={{ padding: "2.5rem", borderRadius: "1.25rem", position: "relative" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
           <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-              <span className={styles.badge} style={{ background: doc.type === "THEORY" ? "var(--primary)" : "var(--warning)", color: "white", padding: "0.25rem 0.75rem", fontSize: "0.8rem", fontWeight: 600 }}>
-                {doc.type}
-              </span>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <div>
+                <span className={styles.badge} style={{ background: doc.type === "THEORY" ? "var(--primary)" : "var(--warning)", color: "white", padding: "0.25rem 0.75rem", fontSize: "0.8rem", fontWeight: 600 }}>
+                  {doc.type}
+                </span>
+              </div>
               {doc.topic && (
                 <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                   <BookOpen size={14} />
@@ -72,7 +74,7 @@ export default function DocumentDetailPage() {
                 </span>
               )}
             </div>
-            <h1 style={{ fontSize: "2.25rem", fontWeight: 700, margin: 0, lineHeight: 1.2, color: "var(--text-primary)" }}>
+            <h1 style={{ fontSize: "1.55rem", fontWeight: 700, margin: 0, lineHeight: 1.3, color: "var(--text-primary)" }}>
               {doc.title}
             </h1>
           </div>

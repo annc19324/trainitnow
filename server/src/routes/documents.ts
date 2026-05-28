@@ -13,6 +13,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Helper to sanitize and preserve the original filename for user downloads
+const getSafePublicId = (originalname: string) => {
+  const lastDotIndex = originalname.lastIndexOf('.');
+  const nameWithoutExt = lastDotIndex !== -1 ? originalname.substring(0, lastDotIndex) : originalname;
+  
+  const asciiName = nameWithoutExt
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove Vietnamese tones
+    .replace(/[^a-zA-Z0-9-_]/g, "_"); // sanitize special characters for safe URLs
+    
+  return `${asciiName}_${Date.now()}`;
+};
+
 // GET all documents
 router.get("/", async (req, res) => {
   try {
@@ -41,9 +54,14 @@ router.post("/", adminMiddleware, upload.single("file"), async (req: AuthRequest
     }
 
     // Upload to Cloudinary via stream
+    const publicId = getSafePublicId(file.originalname);
     const uploadResult: any = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: "auto", folder: "trainitnow/documents" },
+        { 
+          resource_type: "auto", 
+          folder: "trainitnow/documents",
+          public_id: publicId
+        },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
@@ -107,9 +125,14 @@ router.put("/:id", adminMiddleware, upload.single("file"), async (req: AuthReque
 
     if (file) {
       // Upload new file to Cloudinary
+      const publicId = getSafePublicId(file.originalname);
       const uploadResult: any = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { resource_type: "auto", folder: "trainitnow/documents" },
+          { 
+            resource_type: "auto", 
+            folder: "trainitnow/documents",
+            public_id: publicId
+          },
           (error, result) => {
             if (error) reject(error);
             else resolve(result);

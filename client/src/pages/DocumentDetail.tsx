@@ -133,7 +133,8 @@ export default function DocumentDetailPage() {
               lineHeight: "1.7",
               fontSize: "1.05rem",
               color: "var(--text-primary)",
-              overflowWrap: "anywhere"
+              overflowWrap: "anywhere",
+              whiteSpace: "pre-wrap"
             }}
             dangerouslySetInnerHTML={{ 
               __html: doc.description || `<p style="color: var(--text-secondary); font-style: italic;">${language === "vi" ? "Chưa có nội dung mô tả chi tiết." : "No detailed description available."}</p>` 

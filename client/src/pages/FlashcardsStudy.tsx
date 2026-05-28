@@ -5,24 +5,30 @@ import { ArrowLeft, Edit, RotateCcw, Volume2 } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
 const getFontSizeForLines = (text: string, isTerm: boolean = true) => {
-  if (!text) return "2rem";
+  if (!text) return "32px";
   const lines = text.split("\n");
   let maxLength = 0;
   for (const line of lines) {
-    if (line.trim().length > maxLength) {
-      maxLength = line.trim().length;
-    }
+    const len = line.trim().length;
+    if (len > maxLength) maxLength = len;
   }
 
-  // Highly optimized scaling steps to keep very long translations fully visible on mobile screens
-  if (maxLength > 80) return "0.45rem";
-  if (maxLength > 65) return "0.55rem";
-  if (maxLength > 52) return "0.65rem";
-  if (maxLength > 42) return "0.75rem";
-  if (maxLength > 32) return "0.9rem";
-  if (maxLength > 22) return "1.1rem";
-  if (maxLength > 14) return "1.45rem";
-  return isTerm ? "2.2rem" : "2rem";
+  if (maxLength === 0) return "32px";
+
+  // Standard mobile viewport card safe usable width is around 180px after left/right paddings
+  const safeWidth = 180;
+  const charWidthRatio = 0.52; // average character width factor for proportional sans-serif fonts
+  
+  let calculatedSize = Math.floor(safeWidth / (maxLength * charWidthRatio));
+  
+  // Set clear boundaries for maximum legible size and minimum readable size
+  const maxSize = isTerm ? 34 : 26;
+  const minSize = 8;
+  
+  if (calculatedSize > maxSize) calculatedSize = maxSize;
+  if (calculatedSize < minSize) calculatedSize = minSize;
+  
+  return `${calculatedSize}px`;
 };
 
 export default function StudyFlashcardsPage() {

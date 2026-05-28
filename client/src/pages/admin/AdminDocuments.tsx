@@ -446,7 +446,8 @@ export default function AdminDocumentsPage() {
                   padding: "1.5rem 2rem", 
                   background: "rgba(255,255,255,0.02)",
                   overflowY: "auto",
-                  lineHeight: "1.7"
+                  lineHeight: "1.7",
+                  whiteSpace: "pre-wrap"
                 }}
                 dangerouslySetInnerHTML={{ 
                   __html: description || `<p style="color: var(--text-secondary); font-style: italic; text-align: center; margin-top: 4rem;">${language === "vi" ? "Chưa có nội dung lý thuyết để hiển thị." : "No theory contents to display."}</p>` 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../components/LanguageContext";
-import { ArrowLeft, Edit, RotateCcw, Volume2 } from "lucide-react";
+import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
 const getFontSizeForLines = (text: string, isTerm: boolean = true) => {
@@ -51,6 +51,40 @@ export default function StudyFlashcardsPage() {
     if (!id) return;
     fetchSet();
   }, [id]);
+
+  // Global Keyboard controls: ArrowLeft (previous), ArrowRight (next), Space/Enter (flip)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      if (isFinishedRound) return;
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          setIsFlipped(false);
+          setTimeout(() => setCurrentIndex(prev => prev - 1), 150);
+        }
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (currentIndex < learningQueue.length - 1) {
+          setIsFlipped(false);
+          setTimeout(() => setCurrentIndex(prev => prev + 1), 150);
+        } else {
+          setIsFlipped(false);
+          setTimeout(() => setIsFinishedRound(true), 150);
+        }
+      } else if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        setIsFlipped(prev => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, learningQueue.length, isFinishedRound]);
 
   const fetchSet = async () => {
     try {
@@ -211,123 +245,187 @@ export default function StudyFlashcardsPage() {
       <div style={{ 
         flex: 1, 
         display: "flex", 
-        flexDirection: "column", 
-        justifyContent: "center",
+        alignItems: "center", 
+        gap: "1rem",
         perspective: "1000px",
-        marginBottom: "1.5rem"
+        marginBottom: "1.5rem",
+        width: "100%"
       }}>
         {!isFinishedRound && currentCard ? (
-          <div 
-            onClick={() => setIsFlipped(!isFlipped)}
-            style={{
-              position: "relative",
-              width: "100%",
-              height: "280px",
-              textAlign: "center",
-              transition: "transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1)",
-              transformStyle: "preserve-3d",
-              transform: isFlipped ? "rotateX(180deg)" : "rotateX(0deg)",
-              cursor: "pointer"
-            }}
-          >
-            {/* Front of card */}
-            <div style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              backfaceVisibility: "hidden",
-              background: "var(--bg-secondary)",
-              borderRadius: "1rem",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1.5rem 2rem",
-              border: "1px solid var(--border-color)"
-            }}>
-              <div style={{ 
-                fontSize: getFontSizeForLines(currentCard.term, true),
-                textAlign: "center", 
+          <>
+            {/* Left navigation button */}
+            <button
+              className="btn btn-secondary"
+              disabled={currentIndex === 0}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (currentIndex > 0) {
+                  setIsFlipped(false);
+                  setTimeout(() => setCurrentIndex(currentIndex - 1), 150);
+                }
+              }}
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                opacity: currentIndex === 0 ? 0.3 : 0.9,
+                cursor: currentIndex === 0 ? "not-allowed" : "pointer",
+                border: "1px solid var(--border-color)",
+                background: "rgba(255, 255, 255, 0.05)",
+                padding: 0
+              }}
+              title={language === 'vi' ? 'Từ trước đó' : 'Previous Card'}
+            >
+              <ChevronLeft size={22} />
+            </button>
+
+            {/* Flip card */}
+            <div 
+              onClick={() => setIsFlipped(!isFlipped)}
+              style={{
+                position: "relative",
+                flex: 1,
+                height: "280px",
+                textAlign: "center",
+                transition: "transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1)",
+                transformStyle: "preserve-3d",
+                transform: isFlipped ? "rotateX(180deg)" : "rotateX(0deg)",
+                cursor: "pointer"
+              }}
+            >
+              {/* Front of card */}
+              <div style={{
+                position: "absolute",
                 width: "100%",
+                height: "100%",
+                backfaceVisibility: "hidden",
+                background: "var(--bg-secondary)",
+                borderRadius: "1rem",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
                 display: "flex",
                 flexDirection: "column",
-                gap: "0.4rem",
-                justifyContent: "center",
                 alignItems: "center",
-                fontWeight: "bold"
+                justifyContent: "center",
+                padding: "1.5rem 2rem",
+                border: "1px solid var(--border-color)"
               }}>
-                {currentCard.term.split("\n").map((line: string, idx: number) => (
-                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
-                    {line}
-                  </div>
-                ))}
-              </div>
-              <button 
-                onClick={(e) => speakText(currentCard.term, e)}
-                style={{
-                  marginTop: "1rem",
-                  background: "#2563eb",
-                  color: "white",
-                  border: "2px solid rgba(255,255,255,0.2)",
-                  borderRadius: "50%",
-                  width: "50px",
-                  height: "50px",
+                <div style={{ 
+                  fontSize: getFontSizeForLines(currentCard.term, true),
+                  textAlign: "center", 
+                  width: "100%",
                   display: "flex",
-                  alignItems: "center",
+                  flexDirection: "column",
+                  gap: "0.4rem",
                   justifyContent: "center",
-                  cursor: "pointer",
-                  boxShadow: "0 6px 12px rgba(37, 99, 235, 0.3)",
-                  flexShrink: 0
-                }}
-                title={language === 'vi' ? 'Nghe phát âm' : 'Listen'}
-              >
-                <Volume2 size={24} />
-              </button>
-              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                {language === 'vi' ? 'Nhấn ra ngoài để lật thẻ (Tiếng Việt)' : 'Click outside to flip (Vietnamese)'}
+                  alignItems: "center",
+                  fontWeight: "bold"
+                }}>
+                  {currentCard.term.split("\n").map((line: string, idx: number) => (
+                    <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
+                      {line}
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={(e) => speakText(currentCard.term, e)}
+                  style={{
+                    marginTop: "1rem",
+                    background: "#2563eb",
+                    color: "white",
+                    border: "2px solid rgba(255,255,255,0.2)",
+                    borderRadius: "50%",
+                    width: "50px",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 6px 12px rgba(37, 99, 235, 0.3)",
+                    flexShrink: 0
+                  }}
+                  title={language === 'vi' ? 'Nghe phát âm' : 'Listen'}
+                >
+                  <Volume2 size={24} />
+                </button>
+                <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                  {language === 'vi' ? 'Nhấn ra ngoài để lật thẻ (Tiếng Việt)' : 'Click outside to flip (Vietnamese)'}
+                </div>
+              </div>
+
+              {/* Back of card */}
+              <div style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                backfaceVisibility: "hidden",
+                background: "var(--accent-primary)",
+                color: "white",
+                borderRadius: "1rem",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "1.5rem 2rem",
+                transform: "rotateX(180deg)"
+              }}>
+                <div style={{ 
+                  fontSize: getFontSizeForLines(currentCard.definition, false),
+                  textAlign: "center", 
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.4rem",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontWeight: "bold"
+                }}>
+                  {currentCard.definition.split("\n").map((line: string, idx: number) => (
+                    <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
+                      {line}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
+                  {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
+                </div>
               </div>
             </div>
 
-            {/* Back of card */}
-            <div style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              backfaceVisibility: "hidden",
-              background: "var(--accent-primary)",
-              color: "white",
-              borderRadius: "1rem",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1.5rem 2rem",
-              transform: "rotateX(180deg)"
-            }}>
-              <div style={{ 
-                fontSize: getFontSizeForLines(currentCard.definition, false),
-                textAlign: "center", 
-                width: "100%",
+            {/* Right navigation button */}
+            <button
+              className="btn btn-secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (currentIndex < learningQueue.length - 1) {
+                  setIsFlipped(false);
+                  setTimeout(() => setCurrentIndex(currentIndex + 1), 150);
+                } else {
+                  setIsFlipped(false);
+                  setTimeout(() => setIsFinishedRound(true), 150);
+                }
+              }}
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
                 display: "flex",
-                flexDirection: "column",
-                gap: "0.4rem",
-                justifyContent: "center",
                 alignItems: "center",
-                fontWeight: "bold"
-              }}>
-                {currentCard.definition.split("\n").map((line: string, idx: number) => (
-                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
-                    {line}
-                  </div>
-                ))}
-              </div>
-              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
-                {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
-              </div>
-            </div>
-          </div>
+                justifyContent: "center",
+                flexShrink: 0,
+                border: "1px solid var(--border-color)",
+                background: "rgba(255, 255, 255, 0.05)",
+                padding: 0
+              }}
+              title={currentIndex === learningQueue.length - 1 ? (language === 'vi' ? 'Kết thúc' : 'Finish') : (language === 'vi' ? 'Từ tiếp theo' : 'Next Card')}
+            >
+              <ChevronRight size={22} />
+            </button>
+          </>
         ) : (
           <div style={{ textAlign: "center", background: "var(--bg-secondary)", padding: "3rem 1.5rem", borderRadius: "1rem" }}>
             <h2 style={{ marginBottom: "1rem", fontSize: "1.8rem" }}>{language === 'vi' ? 'Vòng học kết thúc!' : 'Round completed!'}</h2>

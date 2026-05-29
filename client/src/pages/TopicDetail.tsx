@@ -71,9 +71,9 @@ export default function TopicDetail() {
                 <div key={doc.id} className={`glass-panel ${styles.card}`}>
                   <h3 style={{ marginBottom: "0.5rem" }}>{doc.title}</h3>
                   <p className={styles.description}>{doc.description}</p>
-                  <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                  <Link to={`/documents/${doc.id}`} className="btn btn-secondary">
                     View Document
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>

@@ -23,6 +23,42 @@ export default function DocumentsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleDownload = async (e: React.MouseEvent, doc: any) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      const response = await fetch(doc.fileUrl);
+      const blob = await response.blob();
+      
+      let ext = "docx"; // default fallback
+      const urlExt = doc.fileUrl.split('.').pop()?.toLowerCase();
+      if (urlExt && ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "zip"].includes(urlExt)) {
+        ext = urlExt;
+      } else {
+        const contentType = blob.type.toLowerCase();
+        if (contentType.includes("pdf")) {
+          ext = "pdf";
+        } else if (contentType.includes("word") || contentType.includes("officedocument.wordprocessingml")) {
+          ext = "docx";
+        } else if (contentType.includes("excel") || contentType.includes("officedocument.spreadsheetml")) {
+          ext = "xlsx";
+        } else if (contentType.includes("presentation") || contentType.includes("officedocument.presentationml")) {
+          ext = "pptx";
+        }
+      }
+      
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      const safeTitle = doc.title.replace(/[/\\?%*:|"<>]/g, '-');
+      link.download = `${safeTitle}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      window.open(doc.fileUrl, "_blank");
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: "4rem" }}>
@@ -86,7 +122,7 @@ export default function DocumentsPage() {
                     rel="noopener noreferrer" 
                     className="btn btn-primary" 
                     style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => handleDownload(e, doc)}
                   >
                     <Download size={14} style={{ marginRight: "0.25rem" }} /> {t("docs.download")}
                   </a>

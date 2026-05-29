@@ -17,13 +17,14 @@ cloudinary.config({
 const getSafePublicId = (originalname: string) => {
   const lastDotIndex = originalname.lastIndexOf('.');
   const nameWithoutExt = lastDotIndex !== -1 ? originalname.substring(0, lastDotIndex) : originalname;
+  const ext = lastDotIndex !== -1 ? originalname.substring(lastDotIndex) : "";
   
   const asciiName = nameWithoutExt
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // remove Vietnamese tones
     .replace(/[^a-zA-Z0-9-_]/g, "_"); // sanitize special characters for safe URLs
     
-  return `${asciiName}_${Date.now()}`;
+  return `${asciiName}_${Date.now()}${ext.toLowerCase()}`;
 };
 
 // GET all documents

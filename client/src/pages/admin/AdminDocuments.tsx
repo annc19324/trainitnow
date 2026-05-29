@@ -45,7 +45,7 @@ export default function AdminDocumentsPage() {
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -167,6 +167,13 @@ export default function AdminDocumentsPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
     setActiveTab("write");
     
+    // Set WYSIWYG editor content safely
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = doc.description || "";
+      }
+    }, 80);
+    
     // Smooth scroll to form
     formRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -180,27 +187,33 @@ export default function AdminDocumentsPage() {
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     setActiveTab("write");
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
   };
 
-  // Rich Text helper to insert HTML elements at current selection inside textarea
-  const insertTag = (openTag: string, closeTag: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  // Safe selection font-size wrapper to apply exact pixel sizes
+  const changeSelectionFontSize = (size: string) => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
     
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const selectedText = text.substring(start, end);
-    const replacement = openTag + selectedText + closeTag;
+    if (range.collapsed) return;
     
-    const newValue = text.substring(0, start) + replacement + text.substring(end);
-    setDescription(newValue);
+    const span = document.createElement("span");
+    span.style.fontSize = size;
     
-    // Restore focus and selection
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + openTag.length, start + openTag.length + selectedText.length);
-    }, 50);
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      const fragment = range.extractContents();
+      span.appendChild(fragment);
+      range.insertNode(span);
+    }
+    
+    if (editorRef.current) {
+      setDescription(editorRef.current.innerHTML);
+    }
   };
 
   return (
@@ -313,147 +326,254 @@ export default function AdminDocumentsPage() {
               </div>
             </div>
 
-            {activeTab === "write" ? (
-              <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--border-color)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
-                {/* Custom Rich Text Toolbar similar to Word */}
-                <div style={{ 
-                  display: "flex", 
-                  gap: "0.25rem", 
-                  padding: "0.5rem", 
-                  background: "rgba(0,0,0,0.3)", 
-                  borderBottom: "1px solid var(--border-color)",
-                  flexWrap: "wrap",
-                  alignItems: "center"
-                }}>
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem", minWidth: "32px" }} title="Bold" onClick={() => insertTag("<strong>", "</strong>")}>
-                    <Bold size={14} />
-                  </button>
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem", minWidth: "32px" }} title="Italic" onClick={() => insertTag("<em>", "</em>")}>
-                    <Italic size={14} />
-                  </button>
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem", minWidth: "32px" }} title="Underline" onClick={() => insertTag("<u>", "</u>")}>
-                    <Underline size={14} />
-                  </button>
-                  
-                  <div style={{ width: "1px", height: "20px", background: "var(--border-color)", margin: "0 0.25rem" }} />
+            {/* WYSIWYG HTML Editor */}
+            <div style={{ display: activeTab === "write" ? "flex" : "none", flexDirection: "column", border: "1px solid var(--border-color)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+              <style dangerouslySetInnerHTML={{__html: `
+                .wysiwyg-editor:empty:before {
+                  content: attr(data-placeholder);
+                  color: var(--text-secondary);
+                  opacity: 0.5;
+                  cursor: text;
+                  pointer-events: none;
+                  display: block;
+                }
+              `}} />
+              
+              {/* Custom Rich Text Toolbar similar to Word */}
+              <div style={{ 
+                display: "flex", 
+                gap: "0.25rem", 
+                padding: "0.5rem", 
+                background: "rgba(0,0,0,0.3)", 
+                borderBottom: "1px solid var(--border-color)",
+                flexWrap: "wrap",
+                alignItems: "center"
+              }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem", minWidth: "32px" }} 
+                  title="Bold" 
+                  onClick={() => {
+                    document.execCommand('bold', false);
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Bold size={14} />
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem", minWidth: "32px" }} 
+                  title="Italic" 
+                  onClick={() => {
+                    document.execCommand('italic', false);
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Italic size={14} />
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem", minWidth: "32px" }} 
+                  title="Underline" 
+                  onClick={() => {
+                    document.execCommand('underline', false);
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Underline size={14} />
+                </button>
+                
+                <div style={{ width: "1px", height: "20px", background: "var(--border-color)", margin: "0 0.25rem" }} />
 
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem", fontWeight: "bold" }} title="Heading 1" onClick={() => insertTag("<h1>", "</h1>")}>
-                    <Heading1 size={14} style={{ marginRight: "0.15rem" }} />H1
-                  </button>
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem", fontWeight: "bold" }} title="Heading 2" onClick={() => insertTag("<h2>", "</h2>")}>
-                    <Heading2 size={14} style={{ marginRight: "0.15rem" }} />H2
-                  </button>
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem", fontWeight: "bold" }} title="Heading 3" onClick={() => insertTag("<h3>", "</h3>")}>
-                    <Heading3 size={14} style={{ marginRight: "0.15rem" }} />H3
-                  </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem", fontWeight: "bold" }} 
+                  title="Heading 1" 
+                  onClick={() => {
+                    document.execCommand('formatBlock', false, '<h1>');
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Heading1 size={14} style={{ marginRight: "0.15rem" }} />H1
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem", fontWeight: "bold" }} 
+                  title="Heading 2" 
+                  onClick={() => {
+                    document.execCommand('formatBlock', false, '<h2>');
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Heading2 size={14} style={{ marginRight: "0.15rem" }} />H2
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem", fontWeight: "bold" }} 
+                  title="Heading 3" 
+                  onClick={() => {
+                    document.execCommand('formatBlock', false, '<h3>');
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Heading3 size={14} style={{ marginRight: "0.15rem" }} />H3
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem 0.5rem", fontSize: "0.75rem" }} 
+                  title="Normal Text" 
+                  onClick={() => {
+                    document.execCommand('formatBlock', false, '<p>');
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  Normal
+                </button>
 
-                  <div style={{ width: "1px", height: "20px", background: "var(--border-color)", margin: "0 0.25rem" }} />
+                <div style={{ width: "1px", height: "20px", background: "var(--border-color)", margin: "0 0.25rem" }} />
 
-                  {/* Bullet Lists */}
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem", minWidth: "32px" }} title="Bullet List (-)" onClick={() => insertTag("<ul>\n  <li>", "</li>\n</ul>")}>
-                    <List size={14} />
-                  </button>
-                  <button type="button" className="btn btn-secondary" style={{ padding: "0.35rem", minWidth: "32px" }} title="Numbered List (+)" onClick={() => insertTag("<ol>\n  <li>", "</li>\n</ol>")}>
-                    <ListOrdered size={14} />
-                  </button>
+                {/* Bullet Lists */}
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem", minWidth: "32px" }} 
+                  title="Bullet List" 
+                  onClick={() => {
+                    document.execCommand('insertUnorderedList', false);
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <List size={14} />
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem", minWidth: "32px" }} 
+                  title="Numbered List" 
+                  onClick={() => {
+                    document.execCommand('insertOrderedList', false);
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <ListOrdered size={14} />
+                </button>
 
-                  <div style={{ width: "1px", height: "20px", background: "var(--border-color)", margin: "0 0.25rem" }} />
+                <div style={{ width: "1px", height: "20px", background: "var(--border-color)", margin: "0 0.25rem" }} />
 
-                  {/* Highlight */}
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    style={{ padding: "0.35rem", minWidth: "32px" }} 
-                    title="Highlight text"
-                    onClick={() => insertTag('<mark style="background: rgba(234, 179, 8, 0.3); color: white; padding: 2px 6px; borderRadius: 4px;">', "</mark>")}
+                {/* Highlight */}
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ padding: "0.35rem", minWidth: "32px" }} 
+                  title="Highlight text"
+                  onClick={() => {
+                    document.execCommand('hiliteColor', false, 'rgba(234, 179, 8, 0.35)');
+                    if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                  }}
+                >
+                  <Highlighter size={14} />
+                </button>
+
+                {/* High contrast text color selection dropdown */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", position: "relative" }}>
+                  <Palette size={14} style={{ color: "var(--text-secondary)", marginLeft: "0.25rem" }} />
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        document.execCommand('foreColor', false, e.target.value);
+                        if (editorRef.current) setDescription(editorRef.current.innerHTML);
+                        e.target.value = ""; // Reset dropdown
+                      }
+                    }}
+                    className="input-field"
+                    style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", width: "auto", height: "28px", margin: 0, background: "rgba(0,0,0,0.5)" }}
                   >
-                    <Highlighter size={14} />
-                  </button>
-
-                  {/* High contrast text color selection dropdown */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", position: "relative" }}>
-                    <Palette size={14} style={{ color: "var(--text-secondary)", marginLeft: "0.25rem" }} />
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          insertTag(`<span style="color: ${e.target.value};">`, "</span>");
-                          e.target.value = ""; // Reset dropdown
-                        }
-                      }}
-                      className="input-field"
-                      style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", width: "auto", height: "28px", margin: 0, background: "rgba(0,0,0,0.5)" }}
-                    >
-                      <option value="">{language === "vi" ? "Màu chữ" : "Color"}</option>
-                      <option value="var(--primary)" style={{ color: "#3b82f6" }}>Primary Blue</option>
-                      <option value="#ef4444" style={{ color: "#ef4444" }}>Red</option>
-                      <option value="#10b981" style={{ color: "#10b981" }}>Green</option>
-                      <option value="#8b5cf6" style={{ color: "#8b5cf6" }}>Purple</option>
-                      <option value="#f59e0b" style={{ color: "#f59e0b" }}>Gold</option>
-                      <option value="#f97316" style={{ color: "#f97316" }}>Orange</option>
-                    </select>
-                  </div>
-
-                  {/* Font Size select */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", position: "relative" }}>
-                    <Type size={14} style={{ color: "var(--text-secondary)", marginLeft: "0.25rem" }} />
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          insertTag(`<span style="font-size: ${e.target.value};">`, "</span>");
-                          e.target.value = ""; // Reset dropdown
-                        }
-                      }}
-                      className="input-field"
-                      style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", width: "auto", height: "28px", margin: 0, background: "rgba(0,0,0,0.5)" }}
-                    >
-                      <option value="">{language === "vi" ? "Cỡ chữ" : "Size"}</option>
-                      <option value="0.85rem">Small</option>
-                      <option value="1.15rem">Medium</option>
-                      <option value="1.35rem">Large</option>
-                      <option value="1.75rem">Extra Large</option>
-                    </select>
-                  </div>
+                    <option value="">{language === "vi" ? "Màu chữ" : "Color"}</option>
+                    <option value="#3b82f6" style={{ color: "#3b82f6" }}>Primary Blue</option>
+                    <option value="#ef4444" style={{ color: "#ef4444" }}>Red</option>
+                    <option value="#10b981" style={{ color: "#10b981" }}>Green</option>
+                    <option value="#8b5cf6" style={{ color: "#8b5cf6" }}>Purple</option>
+                    <option value="#f59e0b" style={{ color: "#f59e0b" }}>Gold</option>
+                    <option value="#f97316" style={{ color: "#f97316" }}>Orange</option>
+                    <option value="#ffffff" style={{ color: "#ffffff" }}>White</option>
+                  </select>
                 </div>
 
-                {/* TEXTAREA - Expanded and highly visible for theory notes */}
-                <textarea 
-                  ref={textareaRef}
-                  className="input-field" 
-                  style={{ 
-                    minHeight: "380px", 
-                    resize: "vertical", 
-                    borderRadius: 0, 
-                    border: "none", 
-                    margin: 0,
-                    padding: "1rem",
-                    lineHeight: "1.6",
-                    fontFamily: "var(--font-mono, monospace)",
-                    fontSize: "0.95rem"
-                  }}
-                  placeholder={language === "vi" ? "Viết lý thuyết hay giáo trình tại đây. Bạn có thể sử dụng công cụ Word ở trên để chèn các tiêu đề H1 H2, danh sách, màu sắc, bôi đậm để bài học dễ nhìn hơn..." : "Write detailed theory or syllabus content here. Use the Word tools above to insert headings H1 H2, bold, highlights, custom colors for premium notes..."}
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)} 
-                />
+                {/* Font Size select */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", position: "relative" }}>
+                  <Type size={14} style={{ color: "var(--text-secondary)", marginLeft: "0.25rem" }} />
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        changeSelectionFontSize(e.target.value);
+                        e.target.value = ""; // Reset dropdown
+                      }
+                    }}
+                    className="input-field"
+                    style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", width: "auto", height: "28px", margin: 0, background: "rgba(0,0,0,0.5)" }}
+                  >
+                    <option value="">{language === "vi" ? "Cỡ chữ" : "Size"}</option>
+                    <option value="12px">12 px</option>
+                    <option value="14px">14 px</option>
+                    <option value="16px">16 px</option>
+                    <option value="18px">18 px</option>
+                    <option value="20px">20 px</option>
+                    <option value="24px">24 px</option>
+                    <option value="28px">28 px</option>
+                    <option value="32px">32 px</option>
+                  </select>
+                </div>
               </div>
-            ) : (
-              /* Live Preview for parsed HTML */
+
+              {/* contentEditable WYSIWYG Workspace */}
               <div 
-                className="theory-rich-content"
+                ref={editorRef}
+                contentEditable
+                className="wysiwyg-editor"
                 style={{ 
-                  minHeight: "414px", 
-                  border: "1px dashed var(--border-color)", 
-                  borderRadius: "var(--radius-md)", 
-                  padding: "1.5rem 2rem", 
-                  background: "rgba(255,255,255,0.02)",
-                  overflowY: "auto",
+                  minHeight: "380px", 
+                  borderRadius: 0, 
+                  border: "none", 
+                  margin: 0,
+                  padding: "1.25rem",
                   lineHeight: "1.7",
-                  whiteSpace: "pre-wrap"
+                  fontSize: "16px",
+                  outline: "none",
+                  background: "rgba(0,0,0,0.15)",
+                  color: "var(--text-primary)",
+                  overflowY: "auto",
+                  textAlign: "left"
                 }}
-                dangerouslySetInnerHTML={{ 
-                  __html: description || `<p style="color: var(--text-secondary); font-style: italic; text-align: center; margin-top: 4rem;">${language === "vi" ? "Chưa có nội dung lý thuyết để hiển thị." : "No theory contents to display."}</p>` 
-                }}
+                data-placeholder={language === "vi" ? "Viết lý thuyết hay giáo trình tại đây. Bạn có thể sử dụng công cụ soạn thảo trực quan ở trên để thay đổi kích cỡ chữ, định dạng, bôi đậm, in nghiêng, đổi màu sắc và highlight trực tiếp..." : "Write detailed theory or syllabus content here. Select text to apply headings, bold, italic, highlight or custom exact pixel sizes..."}
+                onInput={(e) => setDescription(e.currentTarget.innerHTML)}
               />
-            )}
+            </div>
+
+            {/* Live Preview for parsed HTML */}
+            <div 
+              className="theory-rich-content"
+              style={{ 
+                display: activeTab === "preview" ? "block" : "none",
+                minHeight: "414px", 
+                border: "1px dashed var(--border-color)", 
+                borderRadius: "var(--radius-md)", 
+                padding: "1.5rem 2rem", 
+                background: "rgba(255,255,255,0.02)",
+                overflowY: "auto",
+                lineHeight: "1.7",
+                whiteSpace: "pre-wrap"
+              }}
+              dangerouslySetInnerHTML={{ 
+                __html: description || `<p style="color: var(--text-secondary); font-style: italic; text-align: center; margin-top: 4rem;">${language === "vi" ? "Chưa có nội dung lý thuyết để hiển thị." : "No theory contents to display."}</p>` 
+              }}
+            />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>

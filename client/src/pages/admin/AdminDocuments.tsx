@@ -5,8 +5,8 @@ import {
   Trash2, 
   FileText, 
   Download,
-  Edit, 
-  Heading1, 
+  Edit,
+  Heading1,
   Heading2, 
   Heading3, 
   Bold, 
@@ -24,6 +24,8 @@ import {
 import { apiRequest } from "../../components/AuthContext";
 import { useToast } from "../../components/ToastContext";
 import { useLanguage } from "../../components/LanguageContext";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 export default function AdminDocumentsPage() {
   const [documents, setDocuments] = useState<any[]>([]);
@@ -219,74 +221,73 @@ export default function AdminDocumentsPage() {
   const handleDownload = async (doc: any, format: "docx" | "pdf") => {
     // If PDF is requested and the original file is NOT a PDF, we can dynamically export the HTML notes to a beautifully formatted PDF!
     if (format === "pdf" && !doc.fileUrl.toLowerCase().endsWith(".pdf")) {
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) return;
-      
-      const htmlContent = `
-        <html>
-          <head>
-            <title>${doc.title}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-            <style>
-              body {
-                font-family: 'Montserrat', sans-serif;
-                color: #0f172a;
-                line-height: 1.6;
-                padding: 3rem;
-                max-width: 800px;
-                margin: 0 auto;
-              }
-              .header {
-                border-bottom: 2px solid #3b82f6;
-                padding-bottom: 1.5rem;
-                margin-bottom: 2rem;
-              }
-              .title {
-                font-size: 2rem;
-                font-weight: 700;
-                color: #1e3a8a;
-                margin: 0 0 0.5rem 0;
-              }
-              .meta {
-                font-size: 0.875rem;
-                color: #64748b;
-                display: flex;
-                gap: 1.5rem;
-              }
-              .content {
-                font-size: 1.05rem;
-              }
-              h1, h2, h3 {
-                color: #1e3a8a;
-                margin-top: 1.5rem;
-              }
-              @media print {
-                body { padding: 0; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1 class="title">${doc.title}</h1>
-              <div class="meta">
-                <span>Category: ${doc.type}</span>
-                <span>Topic: ${doc.topic?.title || "General"}</span>
-              </div>
-            </div>
-            <div class="content">
-              ${doc.description || "<p>No content available.</p>"}
-            </div>
-            <script>
-              window.onload = function() {
-                window.print();
-                setTimeout(function() { window.close(); }, 500);
-              };
-            </script>
-          </body>
-        </html>
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "-9999px";
+      container.style.width = "800px";
+      container.style.padding = "40px";
+      container.style.background = "#ffffff";
+      container.style.color = "#0f172a";
+      container.style.fontFamily = "'Montserrat', sans-serif";
+      container.style.lineHeight = "1.7";
+      container.style.boxSizing = "border-box";
+
+      container.innerHTML = `
+        <div style="border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px;">
+          <h1 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0 0 10px 0; font-family: 'Montserrat', sans-serif;">${doc.title}</h1>
+          <div style="font-size: 13px; color: #64748b; display: flex; gap: 20px; font-family: 'Montserrat', sans-serif;">
+            <span><strong>Category:</strong> ${doc.type}</span>
+            <span><strong>Topic:</strong> ${doc.topic?.title || "General"}</span>
+            <span><strong>Date:</strong> ${new Date(doc.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
+        <div style="font-size: 16px; color: #1e293b; font-family: 'Montserrat', sans-serif;">
+          ${doc.description || "<p style='color: #64748b; font-style: italic;'>No description available.</p>"}
+        </div>
       `;
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
+
+      document.body.appendChild(container);
+
+      try {
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff"
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: "a4"
+        });
+
+        const imgWidth = 210;
+        const pageHeight = 295;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        const safeTitle = doc.title.replace(/[/\\?%*:|"<>]/g, '-');
+        pdf.save(`${safeTitle}.pdf`);
+      } catch (error) {
+        console.error("PDF generation failed:", error);
+        window.open(doc.fileUrl, "_blank");
+      } finally {
+        document.body.removeChild(container);
+      }
       return;
     }
 

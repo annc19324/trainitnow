@@ -278,20 +278,50 @@
   font-weight: 700;
 }
 
-.ipaPlayBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
+.ipaPlayGroup {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: auto;
+  justify-content: center;
+}
+
+.ipaPlaySoundBtn,
+.ipaPlayWordBtn {
+  flex: 1;
+  padding: 0.45rem 0.35rem;
+  border-radius: 0.6rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.ipaCard:hover .ipaPlayBtn {
+.ipaPlaySoundBtn {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.ipaPlaySoundBtn:hover {
   background: var(--accent-primary);
+  border-color: var(--accent-primary);
   color: #ffffff;
-  transform: scale(1.15);
+  transform: translateY(-1px);
+}
+
+.ipaPlayWordBtn {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+}
+
+.ipaPlayWordBtn:hover {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+  transform: translateY(-1px);
 }

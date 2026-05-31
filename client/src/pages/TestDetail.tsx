@@ -19,6 +19,15 @@ export default function TestDetail() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const shuffleArray = (array: any[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   useEffect(() => {
     if (!id) return;
     apiRequest(`/api/tests/${id}`)
@@ -27,6 +36,12 @@ export default function TestDetail() {
         return res.json();
       })
       .then((data) => {
+        if (data && Array.isArray(data.questions)) {
+          data.questions = data.questions.map((q: any) => ({
+            ...q,
+            answers: shuffleArray(q.answers)
+          }));
+        }
         setTest(data);
       })
       .catch((err) => {

@@ -4,7 +4,7 @@ import {
   UploadCloud, 
   Trash2, 
   FileText, 
-  Link as LinkIcon, 
+  Download,
   Edit, 
   Heading1, 
   Heading2, 
@@ -213,6 +213,97 @@ export default function AdminDocumentsPage() {
     
     if (editorRef.current) {
       setDescription(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleDownload = async (doc: any, format: "docx" | "pdf") => {
+    // If PDF is requested and the original file is NOT a PDF, we can dynamically export the HTML notes to a beautifully formatted PDF!
+    if (format === "pdf" && !doc.fileUrl.toLowerCase().endsWith(".pdf")) {
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+      
+      const htmlContent = `
+        <html>
+          <head>
+            <title>${doc.title}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+              body {
+                font-family: 'Montserrat', sans-serif;
+                color: #0f172a;
+                line-height: 1.6;
+                padding: 3rem;
+                max-width: 800px;
+                margin: 0 auto;
+              }
+              .header {
+                border-bottom: 2px solid #3b82f6;
+                padding-bottom: 1.5rem;
+                margin-bottom: 2rem;
+              }
+              .title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1e3a8a;
+                margin: 0 0 0.5rem 0;
+              }
+              .meta {
+                font-size: 0.875rem;
+                color: #64748b;
+                display: flex;
+                gap: 1.5rem;
+              }
+              .content {
+                font-size: 1.05rem;
+              }
+              h1, h2, h3 {
+                color: #1e3a8a;
+                margin-top: 1.5rem;
+              }
+              @media print {
+                body { padding: 0; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1 class="title">${doc.title}</h1>
+              <div class="meta">
+                <span>Category: ${doc.type}</span>
+                <span>Topic: ${doc.topic?.title || "General"}</span>
+              </div>
+            </div>
+            <div class="content">
+              ${doc.description || "<p>No content available.</p>"}
+            </div>
+            <script>
+              window.onload = function() {
+                window.print();
+                setTimeout(function() { window.close(); }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      return;
+    }
+
+    // Otherwise, fetch and download the original fileUrl
+    try {
+      const response = await fetch(doc.fileUrl);
+      const blob = await response.blob();
+      
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      const safeTitle = doc.title.replace(/[/\\?%*:|"<>]/g, '-');
+      link.download = `${safeTitle}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      window.open(doc.fileUrl, "_blank");
     }
   };
 
@@ -697,9 +788,22 @@ export default function AdminDocumentsPage() {
                 </div>
                 
                 <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: "0.5rem" }} title="View File">
-                    <LinkIcon size={18} />
-                  </a>
+                  <button 
+                    onClick={() => handleDownload(doc, "docx")} 
+                    className="btn btn-secondary" 
+                    style={{ padding: "0.5rem", color: "#3b82f6" }} 
+                    title={language === "vi" ? "Tải xuống Word (DOCX)" : "Download Word (DOCX)"}
+                  >
+                    <FileText size={18} />
+                  </button>
+                  <button 
+                    onClick={() => handleDownload(doc, "pdf")} 
+                    className="btn btn-secondary" 
+                    style={{ padding: "0.5rem", color: "#ef4444" }} 
+                    title={language === "vi" ? "Tải xuống PDF" : "Download PDF"}
+                  >
+                    <Download size={18} />
+                  </button>
                   <button 
                     onClick={() => handleEditClick(doc)} 
                     className="btn btn-secondary" 

@@ -28,33 +28,89 @@ export default function DocumentDetailPage() {
       .finally(() => setLoading(false));
   }, [id, navigate]);
 
-  const handleDownload = async (e: React.MouseEvent) => {
+  const handleDownload = async (e: React.MouseEvent, format: "docx" | "pdf") => {
     e.preventDefault();
+
+    if (format === "pdf" && !doc.fileUrl.toLowerCase().endsWith(".pdf")) {
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+      
+      const htmlContent = `
+        <html>
+          <head>
+            <title>${doc.title}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+              body {
+                font-family: 'Montserrat', sans-serif;
+                color: #0f172a;
+                line-height: 1.6;
+                padding: 3rem;
+                max-width: 800px;
+                margin: 0 auto;
+              }
+              .header {
+                border-bottom: 2px solid #3b82f6;
+                padding-bottom: 1.5rem;
+                margin-bottom: 2rem;
+              }
+              .title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1e3a8a;
+                margin: 0 0 0.5rem 0;
+              }
+              .meta {
+                font-size: 0.875rem;
+                color: #64748b;
+                display: flex;
+                gap: 1.5rem;
+              }
+              .content {
+                font-size: 1.05rem;
+              }
+              h1, h2, h3 {
+                color: #1e3a8a;
+                margin-top: 1.5rem;
+              }
+              @media print {
+                body { padding: 0; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1 class="title">${doc.title}</h1>
+              <div class="meta">
+                <span>Category: ${doc.type}</span>
+                <span>Topic: ${doc.topic?.title || "General"}</span>
+              </div>
+            </div>
+            <div class="content">
+              ${doc.description || "<p>No content available.</p>"}
+            </div>
+            <script>
+              window.onload = function() {
+                window.print();
+                setTimeout(function() { window.close(); }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      return;
+    }
+
     try {
       const response = await fetch(doc.fileUrl);
       const blob = await response.blob();
       
-      let ext = "docx"; // default fallback
-      const urlExt = doc.fileUrl.split('.').pop()?.toLowerCase();
-      if (urlExt && ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "zip"].includes(urlExt)) {
-        ext = urlExt;
-      } else {
-        const contentType = blob.type.toLowerCase();
-        if (contentType.includes("pdf")) {
-          ext = "pdf";
-        } else if (contentType.includes("word") || contentType.includes("officedocument.wordprocessingml")) {
-          ext = "docx";
-        } else if (contentType.includes("excel") || contentType.includes("officedocument.spreadsheetml")) {
-          ext = "xlsx";
-        } else if (contentType.includes("presentation") || contentType.includes("officedocument.presentationml")) {
-          ext = "pptx";
-        }
-      }
-      
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
       const safeTitle = doc.title.replace(/[/\\?%*:|"<>]/g, '-');
-      link.download = `${safeTitle}.${ext}`;
+      link.download = `${safeTitle}.${format}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -114,24 +170,43 @@ export default function DocumentDetailPage() {
             </h1>
           </div>
 
-          <a 
-            href={doc.fileUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            onClick={handleDownload}
-            className="btn btn-primary" 
-            style={{ 
-              display: "inline-flex", 
-              alignItems: "center", 
-              gap: "0.5rem", 
-              padding: "0.75rem 1.25rem", 
-              fontSize: "0.95rem",
-              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.2)"
-            }}
-          >
-            <Download size={18} />
-            <span>{language === "vi" ? "Tải xuống tài liệu" : "Download File"}</span>
-          </a>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <button 
+              onClick={(e) => handleDownload(e, "docx")}
+              className="btn btn-primary" 
+              style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                gap: "0.5rem", 
+                padding: "0.75rem 1.25rem", 
+                fontSize: "0.95rem",
+                background: "#2563eb",
+                borderColor: "#2563eb",
+                boxShadow: "0 4px 12px rgba(37, 99, 235, 0.2)"
+              }}
+            >
+              <Download size={18} />
+              <span>Word (DOCX)</span>
+            </button>
+            <button 
+              onClick={(e) => handleDownload(e, "pdf")}
+              className="btn btn-secondary" 
+              style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                gap: "0.5rem", 
+                padding: "0.75rem 1.25rem", 
+                fontSize: "0.95rem",
+                color: "#ef4444",
+                borderColor: "#ef4444",
+                background: "transparent",
+                boxShadow: "0 4px 12px rgba(239, 68, 68, 0.1)"
+              }}
+            >
+              <Download size={18} />
+              <span>PDF</span>
+            </button>
+          </div>
         </div>
 
         {/* Metadata row */}

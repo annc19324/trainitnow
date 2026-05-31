@@ -23,34 +23,90 @@ export default function DocumentsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDownload = async (e: React.MouseEvent, doc: any) => {
+  const handleDownload = async (e: React.MouseEvent, doc: any, format: "docx" | "pdf") => {
     e.stopPropagation();
     e.preventDefault();
+
+    if (format === "pdf" && !doc.fileUrl.toLowerCase().endsWith(".pdf")) {
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+      
+      const htmlContent = `
+        <html>
+          <head>
+            <title>${doc.title}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+              body {
+                font-family: 'Montserrat', sans-serif;
+                color: #0f172a;
+                line-height: 1.6;
+                padding: 3rem;
+                max-width: 800px;
+                margin: 0 auto;
+              }
+              .header {
+                border-bottom: 2px solid #3b82f6;
+                padding-bottom: 1.5rem;
+                margin-bottom: 2rem;
+              }
+              .title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1e3a8a;
+                margin: 0 0 0.5rem 0;
+              }
+              .meta {
+                font-size: 0.875rem;
+                color: #64748b;
+                display: flex;
+                gap: 1.5rem;
+              }
+              .content {
+                font-size: 1.05rem;
+              }
+              h1, h2, h3 {
+                color: #1e3a8a;
+                margin-top: 1.5rem;
+              }
+              @media print {
+                body { padding: 0; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1 class="title">${doc.title}</h1>
+              <div class="meta">
+                <span>Category: ${doc.type}</span>
+                <span>Topic: ${doc.topic?.title || "General"}</span>
+              </div>
+            </div>
+            <div class="content">
+              ${doc.description || "<p>No content available.</p>"}
+            </div>
+            <script>
+              window.onload = function() {
+                window.print();
+                setTimeout(function() { window.close(); }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      return;
+    }
+
     try {
       const response = await fetch(doc.fileUrl);
       const blob = await response.blob();
       
-      let ext = "docx"; // default fallback
-      const urlExt = doc.fileUrl.split('.').pop()?.toLowerCase();
-      if (urlExt && ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "zip"].includes(urlExt)) {
-        ext = urlExt;
-      } else {
-        const contentType = blob.type.toLowerCase();
-        if (contentType.includes("pdf")) {
-          ext = "pdf";
-        } else if (contentType.includes("word") || contentType.includes("officedocument.wordprocessingml")) {
-          ext = "docx";
-        } else if (contentType.includes("excel") || contentType.includes("officedocument.spreadsheetml")) {
-          ext = "xlsx";
-        } else if (contentType.includes("presentation") || contentType.includes("officedocument.presentationml")) {
-          ext = "pptx";
-        }
-      }
-      
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
       const safeTitle = doc.title.replace(/[/\\?%*:|"<>]/g, '-');
-      link.download = `${safeTitle}.${ext}`;
+      link.download = `${safeTitle}.${format}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -114,18 +170,24 @@ export default function DocumentsPage() {
                 }}>
                   {cleanDescription || t("topics.noDesc")}
                 </p>
-                <div className={styles.stats} style={{ justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
+                <div className={styles.stats} style={{ justifyContent: "space-between", alignItems: "center", marginTop: "auto", flexWrap: "wrap", gap: "0.5rem" }}>
                   <span>{t("tests.topic")} {doc.topic?.title || t("tests.general")}</span>
-                  <a 
-                    href={doc.fileUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="btn btn-primary" 
-                    style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
-                    onClick={(e) => handleDownload(e, doc)}
-                  >
-                    <Download size={14} style={{ marginRight: "0.25rem" }} /> {t("docs.download")}
-                  </a>
+                  <div style={{ display: "flex", gap: "0.4rem" }}>
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ padding: "0.4rem 0.75rem", fontSize: "0.8rem", background: "#2563eb", borderColor: "#2563eb" }}
+                      onClick={(e) => handleDownload(e, doc, "docx")}
+                    >
+                      <Download size={12} style={{ marginRight: "0.25rem" }} /> Word
+                    </button>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ padding: "0.4rem 0.75rem", fontSize: "0.8rem", color: "#ef4444", borderColor: "#ef4444", background: "transparent" }}
+                      onClick={(e) => handleDownload(e, doc, "pdf")}
+                    >
+                      <Download size={12} style={{ marginRight: "0.25rem" }} /> PDF
+                    </button>
+                  </div>
                 </div>
               </div>
             );

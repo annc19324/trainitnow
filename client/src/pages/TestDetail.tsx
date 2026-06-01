@@ -67,6 +67,9 @@ export default function TestDetail() {
     });
     setScore(currentScore);
     setSubmitted(true);
+    
+    // Smooth scroll to the top so students see their score card immediately
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     // Save result if logged in
     if (user) {
@@ -87,7 +90,7 @@ export default function TestDetail() {
         setSaving(false);
       }
     } else {
-      alert(t("test.loginToSave") || "Bạn chưa đăng nhập. Kết quả làm bài của bạn sẽ không được lưu vào hệ thống.");
+      alert(t("test.loginToSave"));
     }
   };
 
@@ -132,10 +135,10 @@ export default function TestDetail() {
   }
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "4rem" }}>
-      <div id="test-container" style={{ padding: "2rem", backgroundColor: "var(--bg-primary)" }}>
-        <h1 className="gradient-text" style={{ fontSize: "2rem", marginBottom: "0.5rem", textAlign: "center" }}>{test.title}</h1>
-        {test.description && <p style={{ textAlign: "center", color: "var(--text-secondary)", marginBottom: "2rem" }}>{test.description}</p>}
+    <div className={`${styles.testWrapper} animate-fade-in`}>
+      <div id="test-container" className={styles.testContainer}>
+        <h1 className={`${styles.testTitle} gradient-text`}>{test.title}</h1>
+        {test.description && <p className={styles.testDescription}>{test.description}</p>}
 
         {submitted && (
           <div className="glass-panel" style={{ padding: "1.5rem", marginBottom: "2rem", textAlign: "center", border: "1px solid var(--accent-primary)" }}>
@@ -161,8 +164,8 @@ export default function TestDetail() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
           {test.questions.map((q: any, i: number) => (
-            <div key={q.id} className="glass-panel" style={{ padding: "1.5rem" }}>
-              <h3 style={{ marginBottom: "1rem", fontSize: "1.125rem", lineHeight: "1.5" }}>
+            <div key={q.id} className={`${styles.questionCard} glass-panel`}>
+              <h3 className={styles.questionTitle}>
                 Câu {i + 1}: {q.content}
               </h3>
 

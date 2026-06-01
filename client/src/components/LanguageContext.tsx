@@ -96,6 +96,7 @@ const translations: Record<Language, Record<string, string>> = {
     "docs.empty.title": "No documents found",
     "docs.empty.desc": "Documents will appear here once uploaded.",
     "docs.download": "Download",
+    "test.loginToSave": "Please log in to save your learning history and track progress."
   },
   vi: {
     "nav.about": "Giới thiệu",
@@ -184,6 +185,7 @@ const translations: Record<Language, Record<string, string>> = {
     "docs.empty.title": "Không tìm thấy tài liệu nào",
     "docs.empty.desc": "Tài liệu sẽ xuất hiện ở đây khi được tải lên.",
     "docs.download": "Tải xuống",
+    "test.loginToSave": "Vui lòng đăng nhập để lưu kết quả và theo dõi tiến trình học tập của bạn."
   }
 };
 

@@ -310,18 +310,18 @@ app.get("/", (req, res) => {
             </div>
             <div class="info-row">
               <span class="info-label">Thời gian hiện tại</span>
-              <span class="info-value">\${new Date().toLocaleTimeString('vi-VN')}</span>
+              <span class="info-value">${new Date().toLocaleTimeString('vi-VN')}</span>
             </div>
           </div>
 
           <div class="footer">
-            &copy; \${new Date().getFullYear()} TrainItNow. All rights reserved.
+            &copy; ${new Date().getFullYear()} TrainItNow. All rights reserved.
           </div>
         </div>
       </div>
     </body>
     </html>
-  \`);
+  `);
 });
 
 app.get("/health", (req, res) => {
@@ -329,5 +329,5 @@ app.get("/health", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(\`Server is running on port \${port}\`);
+  console.log(`Server is running on port ${port}`);
 });

@@ -4,7 +4,10 @@ import { useLanguage } from "../components/LanguageContext";
 import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
-const getFontSizeForLines = (text: string) => {
+// nowrap=true  → English side: each \n-segment must fit on ONE line, so use the
+//                 actual card text-area width as safeWidth (card minus side paddings).
+// nowrap=false → Vietnamese side: text wraps, so font can be generous.
+const getFontSizeForLines = (text: string, nowrap: boolean = false) => {
   if (!text) return "32px";
   const segments = text.split("\n");
   let maxLength = 0;
@@ -15,11 +18,14 @@ const getFontSizeForLines = (text: string) => {
 
   if (maxLength === 0) return "32px";
 
-  // Scale safeWidth with the viewport so desktop gets larger text.
-  // Card maxWidth is 800px; on desktop usable text area ≈ 720px - 4rem*2 padding ≈ 590px.
-  // On mobile (< 768px) keep 240px which already works well.
   const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
-  const safeWidth = isDesktop ? 520 : 240;
+
+  // On desktop the card is ~720px wide with 4rem (64px) side padding each → ~590px text area.
+  // On mobile (~375px screen, 1rem container + 4rem card padding each side) → ~215px text area.
+  // For wrapping Vietnamese we can be a bit more generous since overflow wraps rather than clips.
+  const safeWidth = isDesktop
+    ? (nowrap ? 520 : 560)
+    : (nowrap ? 215 : 240);
   const charWidthRatio = 0.56;
 
   let calculatedSize = Math.floor(safeWidth / (maxLength * charWidthRatio));
@@ -276,7 +282,7 @@ export default function StudyFlashcardsPage() {
               overflow: "hidden"
             }}>
               <div style={{ 
-                fontSize: getFontSizeForLines(currentCard.term),
+                fontSize: getFontSizeForLines(currentCard.term, true),
                 textAlign: "center", 
                 width: "100%",
                 display: "flex",
@@ -287,7 +293,7 @@ export default function StudyFlashcardsPage() {
                 fontWeight: "bold"
               }}>
                 {currentCard.term.split("\n").map((line: string, idx: number) => (
-                  <div key={idx} style={{ whiteSpace: "normal", wordBreak: "break-word", width: "100%", overflowWrap: "break-word" }}>
+                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", textAlign: "center" }}>
                     {line}
                   </div>
                 ))}
@@ -313,9 +319,7 @@ export default function StudyFlashcardsPage() {
               >
                 <Volume2 size={24} />
               </button>
-              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Việt)' : 'Click to flip (Vietnamese)'}
-              </div>
+
 
               {/* Left nav — inside front face */}
               <button
@@ -423,9 +427,7 @@ export default function StudyFlashcardsPage() {
                   </div>
                 ))}
               </div>
-              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
-                {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
-              </div>
+
 
               {/* Left nav — inside back face (also rotated so it appears correct) */}
               <button

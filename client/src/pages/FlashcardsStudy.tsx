@@ -95,11 +95,7 @@ export default function StudyFlashcardsPage() {
         const data = await res.json();
         setSet(data);
         
-        // Sort cards alphabetically by term/title
-        const sortedCards = [...(data.flashcards || [])].sort((a, b) => 
-          a.term.localeCompare(b.term, language === "vi" ? "vi" : "en", { sensitivity: "base" })
-        );
-        setLearningQueue(sortedCards);
+        setLearningQueue(data.flashcards || []);
         
         setSkippedInRound([]);
         setIsFinishedRound(false);
@@ -180,10 +176,7 @@ export default function StudyFlashcardsPage() {
   };
 
   const handleRestart = () => {
-    const sortedCards = [...(set?.flashcards || [])].sort((a, b) => 
-      a.term.localeCompare(b.term, language === "vi" ? "vi" : "en", { sensitivity: "base" })
-    );
-    setLearningQueue(sortedCards);
+    setLearningQueue([...(set?.flashcards || [])]);
     setSkippedInRound([]);
     setCurrentIndex(0);
     setIsFinishedRound(false);

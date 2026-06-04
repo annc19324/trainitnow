@@ -15,15 +15,17 @@ const getFontSizeForLines = (text: string, isTerm: boolean = true) => {
 
   if (maxLength === 0) return "32px";
 
-  // Standard mobile viewport card safe usable width is around 180px after left/right paddings
-  const safeWidth = 180;
-  const charWidthRatio = 0.52; // average character width factor for proportional sans-serif fonts
+  // Use a generous safe width — nav buttons are now inside the card,
+  // so the full card width is available. The card typically renders
+  // around 320px wide on mobile and wider on desktop.
+  const safeWidth = isTerm ? 260 : 300;
+  const charWidthRatio = isTerm ? 0.52 : 0.58; // Vietnamese chars are slightly wider
   
   let calculatedSize = Math.floor(safeWidth / (maxLength * charWidthRatio));
   
-  // Set clear boundaries for maximum legible size and minimum readable size
-  const maxSize = isTerm ? 34 : 26;
-  const minSize = 8;
+  // Generous max sizes so text is easy to read, especially the Vietnamese side
+  const maxSize = isTerm ? 40 : 36;
+  const minSize = 12;
   
   if (calculatedSize > maxSize) calculatedSize = maxSize;
   if (calculatedSize < minSize) calculatedSize = minSize;
@@ -243,189 +245,268 @@ export default function StudyFlashcardsPage() {
       )}
 
       <div style={{ 
-        flex: 1, 
-        display: "flex", 
-        alignItems: "center", 
-        gap: "1rem",
+        flex: 1,
         perspective: "1000px",
         marginBottom: "1.5rem",
         width: "100%"
       }}>
         {!isFinishedRound && currentCard ? (
-          <>
-            {/* Left navigation button */}
-            <button
-              className="btn btn-secondary"
-              disabled={currentIndex === 0}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (currentIndex > 0) {
-                  setIsFlipped(false);
-                  setTimeout(() => setCurrentIndex(currentIndex - 1), 150);
-                }
-              }}
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                opacity: currentIndex === 0 ? 0.3 : 0.9,
-                cursor: currentIndex === 0 ? "not-allowed" : "pointer",
-                border: "1px solid var(--border-color)",
-                background: "rgba(255, 255, 255, 0.05)",
-                padding: 0
-              }}
-              title={language === 'vi' ? 'Từ trước đó' : 'Previous Card'}
-            >
-              <ChevronLeft size={22} />
-            </button>
-
-            {/* Flip card */}
-            <div 
-              onClick={() => setIsFlipped(!isFlipped)}
-              style={{
-                position: "relative",
-                flex: 1,
-                height: "280px",
-                textAlign: "center",
-                transition: "transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1)",
-                transformStyle: "preserve-3d",
-                transform: isFlipped ? "rotateX(180deg)" : "rotateX(0deg)",
-                cursor: "pointer"
-              }}
-            >
-              {/* Front of card */}
-              <div style={{
-                position: "absolute",
+          /* Flip card — nav buttons are INSIDE so card always fills full width */
+          <div 
+            onClick={() => setIsFlipped(!isFlipped)}
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "300px",
+              textAlign: "center",
+              transition: "transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1)",
+              transformStyle: "preserve-3d",
+              transform: isFlipped ? "rotateX(180deg)" : "rotateX(0deg)",
+              cursor: "pointer"
+            }}
+          >
+            {/* Front of card */}
+            <div style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backfaceVisibility: "hidden",
+              background: "var(--bg-secondary)",
+              borderRadius: "1rem",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1rem 4rem",
+              border: "1px solid var(--border-color)",
+              overflow: "hidden"
+            }}>
+              <div style={{ 
+                fontSize: getFontSizeForLines(currentCard.term, true),
+                textAlign: "center", 
                 width: "100%",
-                height: "100%",
-                backfaceVisibility: "hidden",
-                background: "var(--bg-secondary)",
-                borderRadius: "1rem",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                gap: "0.4rem",
                 justifyContent: "center",
-                padding: "1.5rem 2rem",
-                border: "1px solid var(--border-color)"
+                alignItems: "center",
+                fontWeight: "bold"
               }}>
-                <div style={{ 
-                  fontSize: getFontSizeForLines(currentCard.term, true),
-                  textAlign: "center", 
-                  width: "100%",
+                {currentCard.term.split("\n").map((line: string, idx: number) => (
+                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
+                    {line}
+                  </div>
+                ))}
+              </div>
+              <button 
+                onClick={(e) => speakText(currentCard.term, e)}
+                style={{
+                  marginTop: "1rem",
+                  background: "#2563eb",
+                  color: "white",
+                  border: "2px solid rgba(255,255,255,0.2)",
+                  borderRadius: "50%",
+                  width: "50px",
+                  height: "50px",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "0.4rem",
-                  justifyContent: "center",
                   alignItems: "center",
-                  fontWeight: "bold"
-                }}>
-                  {currentCard.term.split("\n").map((line: string, idx: number) => (
-                    <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
-                      {line}
-                    </div>
-                  ))}
-                </div>
-                <button 
-                  onClick={(e) => speakText(currentCard.term, e)}
-                  style={{
-                    marginTop: "1rem",
-                    background: "#2563eb",
-                    color: "white",
-                    border: "2px solid rgba(255,255,255,0.2)",
-                    borderRadius: "50%",
-                    width: "50px",
-                    height: "50px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: "0 6px 12px rgba(37, 99, 235, 0.3)",
-                    flexShrink: 0
-                  }}
-                  title={language === 'vi' ? 'Nghe phát âm' : 'Listen'}
-                >
-                  <Volume2 size={24} />
-                </button>
-                <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                  {language === 'vi' ? 'Nhấn ra ngoài để lật thẻ (Tiếng Việt)' : 'Click outside to flip (Vietnamese)'}
-                </div>
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 6px 12px rgba(37, 99, 235, 0.3)",
+                  flexShrink: 0
+                }}
+                title={language === 'vi' ? 'Nghe phát âm' : 'Listen'}
+              >
+                <Volume2 size={24} />
+              </button>
+              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Việt)' : 'Click to flip (Vietnamese)'}
               </div>
 
-              {/* Back of card */}
-              <div style={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                backfaceVisibility: "hidden",
-                background: "var(--accent-primary)",
-                color: "white",
-                borderRadius: "1rem",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "1.5rem 2rem",
-                transform: "rotateX(180deg)"
-              }}>
-                <div style={{ 
-                  fontSize: getFontSizeForLines(currentCard.definition, false),
-                  textAlign: "center", 
-                  width: "100%",
+              {/* Left nav — inside front face */}
+              <button
+                className="btn btn-secondary"
+                disabled={currentIndex === 0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentIndex > 0) {
+                    setIsFlipped(false);
+                    setTimeout(() => setCurrentIndex(currentIndex - 1), 150);
+                  }
+                }}
+                style={{
+                  position: "absolute",
+                  left: "0.6rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "0.4rem",
-                  justifyContent: "center",
                   alignItems: "center",
-                  fontWeight: "bold"
-                }}>
-                  {currentCard.definition.split("\n").map((line: string, idx: number) => (
-                    <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
-                      {line}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
-                  {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
-                </div>
-              </div>
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  opacity: currentIndex === 0 ? 0.3 : 0.85,
+                  cursor: currentIndex === 0 ? "not-allowed" : "pointer",
+                  border: "1px solid var(--border-color)",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  padding: 0,
+                  zIndex: 2
+                }}
+                title={language === 'vi' ? 'Từ trước đó' : 'Previous Card'}
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              {/* Right nav — inside front face */}
+              <button
+                className="btn btn-secondary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentIndex < learningQueue.length - 1) {
+                    setIsFlipped(false);
+                    setTimeout(() => setCurrentIndex(currentIndex + 1), 150);
+                  } else {
+                    setIsFlipped(false);
+                    setTimeout(() => setIsFinishedRound(true), 150);
+                  }
+                }}
+                style={{
+                  position: "absolute",
+                  right: "0.6rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  border: "1px solid var(--border-color)",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  padding: 0,
+                  zIndex: 2
+                }}
+                title={currentIndex === learningQueue.length - 1 ? (language === 'vi' ? 'Kết thúc' : 'Finish') : (language === 'vi' ? 'Từ tiếp theo' : 'Next Card')}
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
 
-            {/* Right navigation button */}
-            <button
-              className="btn btn-secondary"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (currentIndex < learningQueue.length - 1) {
-                  setIsFlipped(false);
-                  setTimeout(() => setCurrentIndex(currentIndex + 1), 150);
-                } else {
-                  setIsFlipped(false);
-                  setTimeout(() => setIsFinishedRound(true), 150);
-                }
-              }}
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
+            {/* Back of card */}
+            <div style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backfaceVisibility: "hidden",
+              background: "var(--accent-primary)",
+              color: "white",
+              borderRadius: "1rem",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1rem 4rem",
+              transform: "rotateX(180deg)",
+              overflow: "hidden"
+            }}>
+              <div style={{ 
+                fontSize: getFontSizeForLines(currentCard.definition, false),
+                textAlign: "center", 
+                width: "100%",
                 display: "flex",
-                alignItems: "center",
+                flexDirection: "column",
+                gap: "0.4rem",
                 justifyContent: "center",
-                flexShrink: 0,
-                border: "1px solid var(--border-color)",
-                background: "rgba(255, 255, 255, 0.05)",
-                padding: 0
-              }}
-              title={currentIndex === learningQueue.length - 1 ? (language === 'vi' ? 'Kết thúc' : 'Finish') : (language === 'vi' ? 'Từ tiếp theo' : 'Next Card')}
-            >
-              <ChevronRight size={22} />
-            </button>
-          </>
+                alignItems: "center",
+                fontWeight: "bold"
+              }}>
+                {currentCard.definition.split("\n").map((line: string, idx: number) => (
+                  <div key={idx} style={{ whiteSpace: "normal", wordBreak: "break-word", width: "100%", overflowWrap: "break-word" }}>
+                    {line}
+                  </div>
+                ))}
+              </div>
+              <div style={{ position: "absolute", bottom: "0.5rem", fontSize: "0.75rem", opacity: 0.8 }}>
+                {language === 'vi' ? 'Nhấn để lật thẻ (Tiếng Anh)' : 'Click to flip (English)'}
+              </div>
+
+              {/* Left nav — inside back face (also rotated so it appears correct) */}
+              <button
+                className="btn btn-secondary"
+                disabled={currentIndex === 0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentIndex > 0) {
+                    setIsFlipped(false);
+                    setTimeout(() => setCurrentIndex(currentIndex - 1), 150);
+                  }
+                }}
+                style={{
+                  position: "absolute",
+                  right: "0.6rem",  /* mirrored because back face is rotateX(180deg) */
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  opacity: currentIndex === 0 ? 0.3 : 0.85,
+                  cursor: currentIndex === 0 ? "not-allowed" : "pointer",
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  background: "rgba(255, 255, 255, 0.15)",
+                  color: "white",
+                  padding: 0,
+                  zIndex: 2
+                }}
+                title={language === 'vi' ? 'Từ trước đó' : 'Previous Card'}
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              {/* Right nav — inside back face */}
+              <button
+                className="btn btn-secondary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentIndex < learningQueue.length - 1) {
+                    setIsFlipped(false);
+                    setTimeout(() => setCurrentIndex(currentIndex + 1), 150);
+                  } else {
+                    setIsFlipped(false);
+                    setTimeout(() => setIsFinishedRound(true), 150);
+                  }
+                }}
+                style={{
+                  position: "absolute",
+                  left: "0.6rem",  /* mirrored because back face is rotateX(180deg) */
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  background: "rgba(255, 255, 255, 0.15)",
+                  color: "white",
+                  padding: 0,
+                  zIndex: 2
+                }}
+                title={currentIndex === learningQueue.length - 1 ? (language === 'vi' ? 'Kết thúc' : 'Finish') : (language === 'vi' ? 'Từ tiếp theo' : 'Next Card')}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
         ) : (
           <div style={{ textAlign: "center", background: "var(--bg-secondary)", padding: "3rem 1.5rem", borderRadius: "1rem" }}>
             <h2 style={{ marginBottom: "1rem", fontSize: "1.8rem" }}>{language === 'vi' ? 'Vòng học kết thúc!' : 'Round completed!'}</h2>

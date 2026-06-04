@@ -407,7 +407,7 @@ export default function StudyFlashcardsPage() {
               overflow: "hidden"
             }}>
               <div style={{ 
-                fontSize: getFontSizeForLines(currentCard.definition, false),
+                fontSize: getFontSizeForLines(currentCard.definition),
                 textAlign: "center", 
                 width: "100%",
                 display: "flex",

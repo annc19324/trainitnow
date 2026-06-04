@@ -4,32 +4,32 @@ import { useLanguage } from "../components/LanguageContext";
 import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
-const getFontSizeForLines = (text: string, isTerm: boolean = true) => {
+const getFontSizeForLines = (text: string) => {
   if (!text) return "32px";
-  const lines = text.split("\n");
+  const segments = text.split("\n");
   let maxLength = 0;
-  for (const line of lines) {
-    const len = line.trim().length;
+  for (const seg of segments) {
+    const len = seg.trim().length;
     if (len > maxLength) maxLength = len;
   }
 
   if (maxLength === 0) return "32px";
 
-  // Use a generous safe width — nav buttons are now inside the card,
-  // so the full card width is available. The card typically renders
-  // around 320px wide on mobile and wider on desktop.
-  const safeWidth = isTerm ? 260 : 300;
-  const charWidthRatio = isTerm ? 0.52 : 0.58; // Vietnamese chars are slightly wider
-  
+  // Scale safeWidth with the viewport so desktop gets larger text.
+  // Card maxWidth is 800px; on desktop usable text area ≈ 720px - 4rem*2 padding ≈ 590px.
+  // On mobile (< 768px) keep 240px which already works well.
+  const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+  const safeWidth = isDesktop ? 520 : 240;
+  const charWidthRatio = 0.56;
+
   let calculatedSize = Math.floor(safeWidth / (maxLength * charWidthRatio));
-  
-  // Generous max sizes so text is easy to read, especially the Vietnamese side
-  const maxSize = isTerm ? 40 : 36;
-  const minSize = 12;
-  
+
+  const maxSize = isDesktop ? 64 : 40;
+  const minSize = 14;
+
   if (calculatedSize > maxSize) calculatedSize = maxSize;
   if (calculatedSize < minSize) calculatedSize = minSize;
-  
+
   return `${calculatedSize}px`;
 };
 
@@ -283,7 +283,7 @@ export default function StudyFlashcardsPage() {
               overflow: "hidden"
             }}>
               <div style={{ 
-                fontSize: getFontSizeForLines(currentCard.term, true),
+                fontSize: getFontSizeForLines(currentCard.term),
                 textAlign: "center", 
                 width: "100%",
                 display: "flex",
@@ -294,7 +294,7 @@ export default function StudyFlashcardsPage() {
                 fontWeight: "bold"
               }}>
                 {currentCard.term.split("\n").map((line: string, idx: number) => (
-                  <div key={idx} style={{ whiteSpace: "nowrap", width: "100%", overflow: "visible" }}>
+                  <div key={idx} style={{ whiteSpace: "normal", wordBreak: "break-word", width: "100%", overflowWrap: "break-word" }}>
                     {line}
                   </div>
                 ))}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../components/LanguageContext";
-import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight, List, CreditCard } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
 
 // nowrap=true  → English side: each \n-segment must fit on ONE line, so use the
@@ -54,6 +54,7 @@ export default function StudyFlashcardsPage() {
   const [learningQueue, setLearningQueue] = useState<any[]>([]);
   const [skippedInRound, setSkippedInRound] = useState<any[]>([]);
   const [isFinishedRound, setIsFinishedRound] = useState(false);
+  const [viewMode, setViewMode] = useState<"card" | "list">("card");
 
   useEffect(() => {
     if (!id) return;
@@ -67,7 +68,7 @@ export default function StudyFlashcardsPage() {
         return;
       }
 
-      if (isFinishedRound) return;
+      if (isFinishedRound || viewMode === "list") return;
 
       if (e.key === "ArrowLeft") {
         e.preventDefault();
@@ -92,7 +93,7 @@ export default function StudyFlashcardsPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex, learningQueue.length, isFinishedRound]);
+  }, [currentIndex, learningQueue.length, isFinishedRound, viewMode]);
 
   const fetchSet = async () => {
     try {
@@ -218,6 +219,14 @@ export default function StudyFlashcardsPage() {
             {set.title}
           </h1>
         </div>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setViewMode(prev => prev === "card" ? "list" : "card")}
+          style={{ padding: "0.5rem" }}
+          title={viewMode === "card" ? (language === "vi" ? "Xem dạng danh sách" : "View as list") : (language === "vi" ? "Xem dạng thẻ" : "View as cards")}
+        >
+          {viewMode === "card" ? <List size={18} /> : <CreditCard size={18} />}
+        </button>
         {user && (
           <Link to={`/flashcards/${id}/edit`} className="btn btn-secondary" style={{ padding: "0.5rem" }}>
             <Edit size={18} />
@@ -225,6 +234,45 @@ export default function StudyFlashcardsPage() {
         )}
       </div>
       
+      {viewMode === "list" ? (
+        <div style={{ flex: 1, background: "var(--bg-secondary)", borderRadius: "1rem", padding: "1.5rem", overflowY: "auto" }}>
+          <h2 style={{ marginBottom: "1.5rem", fontSize: "1.25rem" }}>
+            {language === 'vi' ? 'Danh sách từ vựng' : 'Vocabulary List'} ({set.flashcards.length})
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            {set.flashcards.map((card: any, idx: number) => (
+              <div key={card.id || idx} style={{ display: "flex", gap: "0.75rem", lineHeight: "1.5", paddingBottom: "1.25rem", borderBottom: "1px solid var(--border-color)" }}>
+                <span style={{ fontWeight: "bold", color: "var(--text-secondary)", minWidth: "1.5rem", paddingTop: "0.1rem" }}>{idx + 1}.</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontWeight: "bold", color: "var(--accent-primary)", fontSize: "1.1rem" }}>{card.term.replace(/\n/g, ' ')}</span>
+                  <span style={{ margin: "0 0.5rem" }}>:</span>
+                  <span style={{ fontSize: "1.05rem", color: "var(--text-primary)" }}>{card.definition.replace(/\n/g, ' ')}</span>
+                </div>
+                <button 
+                  onClick={(e) => speakText(card.term, e)}
+                  style={{
+                    background: "rgba(37, 99, 235, 0.1)",
+                    border: "none",
+                    color: "#2563eb",
+                    cursor: "pointer",
+                    padding: "0.5rem",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "fit-content",
+                    transition: "background 0.2s"
+                  }}
+                  title={language === 'vi' ? 'Nghe phát âm' : 'Listen'}
+                >
+                  <Volume2 size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
       {/* Progress Bar */}
       {!isFinishedRound && learningQueue.length > 0 && (
         <div style={{ marginBottom: "1.5rem" }}>
@@ -610,6 +658,8 @@ export default function StudyFlashcardsPage() {
             {language === 'vi' ? 'Đã nhớ' : 'Got it'}
           </button>
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -62,6 +62,9 @@ export default function FlashcardsPage() {
         setNewDesc("");
         setShowCreateForm(false);
         navigate(`/flashcards/${newSet.id}/edit`);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(language === 'vi' ? `Lỗi: ${errData.error || 'Không thể tạo bộ thẻ'}` : `Error: ${errData.error || 'Failed to create set'}`);
       }
     } catch (error) {
       console.error("Failed to create flashcard set", error);

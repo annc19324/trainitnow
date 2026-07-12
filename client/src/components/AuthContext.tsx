@@ -89,5 +89,11 @@ export async function apiRequest(path: string, options: RequestInit = {}) {
     headers,
   });
 
+  if (response.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  }
+
   return response;
 }

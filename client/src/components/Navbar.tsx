@@ -98,6 +98,7 @@ export default function Navbar() {
           <Link to="/tests" className={styles.link}>{t("nav.tests")}</Link>
           <Link to="/documents" className={styles.link}>{t("nav.documents")}</Link>
           <Link to="/flashcards" className={styles.link}>{t("nav.flashcards")}</Link>
+          <Link to="/dictionary" className={styles.link}>{language === "vi" ? "Từ điển" : "Dictionary"}</Link>
           {user && (
             <Link to="/chat" className={styles.link} style={{ display: "flex", alignItems: "center" }}>
               {language === "vi" ? "Trò chuyện" : "Chat"}
@@ -198,6 +199,7 @@ export default function Navbar() {
             <Link to="/tests" className={styles.mobileLink} onClick={closeMobileMenu}><BookOpen size={18} /> {t("nav.tests")}</Link>
             <Link to="/documents" className={styles.mobileLink} onClick={closeMobileMenu}><FileText size={18} /> {t("nav.documents")}</Link>
             <Link to="/flashcards" className={styles.mobileLink} onClick={closeMobileMenu}><BookOpen size={18} /> {t("nav.flashcards")}</Link>
+            <Link to="/dictionary" className={styles.mobileLink} onClick={closeMobileMenu}><BookOpen size={18} /> {language === "vi" ? "Từ điển" : "Dictionary"}</Link>
             {user && (
               <Link to="/chat" className={styles.mobileLink} onClick={closeMobileMenu}>
                 <MessageSquare size={18} /> {language === "vi" ? "Trò chuyện" : "Chat"}

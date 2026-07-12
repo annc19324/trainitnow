@@ -46,6 +46,7 @@ model User {
   testResults  TestResult[]
   sentMessages     ChatMessage[] @relation("SentMessages")
   receivedMessages ChatMessage[] @relation("ReceivedMessages")
+  dictionaryHistory DictionaryHistory[]
 }
 
 model Topic {
@@ -177,4 +178,14 @@ model ChatMessage {
   group       ChatGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
   isRead      Boolean    @default(false)
   createdAt   DateTime   @default(now())
+}
+
+model DictionaryHistory {
+  id        String   @id @default(uuid())
+  word      String
+  phonetic  String?
+  meaning   String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

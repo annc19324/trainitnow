@@ -25,6 +25,7 @@ import Documents from "./pages/Documents";
 import DocumentDetail from "./pages/DocumentDetail";
 import MyDocuments from "./pages/MyDocuments";
 import Chat from "./pages/Chat";
+import Dictionary from "./pages/Dictionary";
 
 // Flashcard Vocabulary Set Pages
 import Flashcards from "./pages/Flashcards";
@@ -61,6 +62,7 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
 
                 {/* Topics & Material Routes */}
+                <Route path="/dictionary" element={<Dictionary />} />
                 <Route path="/topics" element={<Topics />} />
                 <Route path="/topics/:id" element={<TopicDetail />} />
                 <Route path="/documents" element={<Documents />} />

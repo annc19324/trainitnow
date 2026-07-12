@@ -11,6 +11,7 @@ import commentRoutes from "./routes/comments";
 import userRoutes from "./routes/users";
 import adminRoutes from "./routes/admin";
 import chatRoutes from "./routes/chat";
+import dictionaryRoutes from "./routes/dictionary";
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/dictionary", dictionaryRoutes);
 
 app.get("/", (req, res) => {
   res.send(`

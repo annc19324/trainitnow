@@ -5,7 +5,7 @@ import { useAuth, apiRequest } from "../components/AuthContext";
 import { useToast } from "../components/ToastContext";
 
 export default function Dictionary() {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const { user } = useAuth();
   const { showToast } = useToast();
 

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../components/LanguageContext";
-import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight, List, CreditCard } from "lucide-react";
+import { ArrowLeft, Edit, RotateCcw, Volume2, ChevronLeft, ChevronRight, List, CreditCard, Copy } from "lucide-react";
 import { apiRequest, useAuth } from "../components/AuthContext";
+import { useToast } from "../components/ToastContext";
 
 // nowrap=true  → English side: each \n-segment must fit on ONE line, so use the
 //                 actual card text-area width as safeWidth (card minus side paddings).
@@ -44,6 +45,7 @@ export default function StudyFlashcardsPage() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   
   const [loading, setLoading] = useState(true);
   const [set, setSet] = useState<any>(null);
@@ -190,6 +192,19 @@ export default function StudyFlashcardsPage() {
     setIsFlipped(false);
   };
 
+  const handleCopyAll = () => {
+    if (!set || !set.flashcards) return;
+    
+    const textToCopy = set.flashcards.map((card: any) => `${card.term}\n${card.definition}`).join('\n\n');
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast(language === 'vi' ? 'Đã sao chép danh sách từ!' : 'Copied to clipboard!', 'success');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      showToast(language === 'vi' ? 'Lỗi khi sao chép!' : 'Failed to copy!', 'error');
+    });
+  };
+
   if (loading) return <div className="container" style={{ padding: "4rem 1rem", textAlign: "center" }}>Loading...</div>;
 
   if (!set || !set.flashcards || set.flashcards.length === 0) {
@@ -221,6 +236,14 @@ export default function StudyFlashcardsPage() {
         </div>
         <button
           className="btn btn-secondary"
+          onClick={handleCopyAll}
+          style={{ padding: "0.5rem" }}
+          title={language === "vi" ? "Sao chép tất cả" : "Copy all"}
+        >
+          <Copy size={18} />
+        </button>
+        <button
+          className="btn btn-secondary"
           onClick={() => setViewMode(prev => prev === "card" ? "list" : "card")}
           style={{ padding: "0.5rem" }}
           title={viewMode === "card" ? (language === "vi" ? "Xem dạng danh sách" : "View as list") : (language === "vi" ? "Xem dạng thẻ" : "View as cards")}
@@ -228,7 +251,7 @@ export default function StudyFlashcardsPage() {
           {viewMode === "card" ? <List size={18} /> : <CreditCard size={18} />}
         </button>
         {user && (
-          <Link to={`/flashcards/${id}/edit`} className="btn btn-secondary" style={{ padding: "0.5rem" }}>
+          <Link to={`/flashcards/${id}/edit`} className="btn btn-secondary" style={{ padding: "0.5rem" }} title={language === "vi" ? "Sửa" : "Edit"}>
             <Edit size={18} />
           </Link>
         )}
